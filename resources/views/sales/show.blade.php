@@ -140,13 +140,26 @@
                     </table>
 
                     <div class="r-solid"></div>
+                    <div class="total-items"><span>Total Items:</span><span>{{ $sale->items->sum('quantity') }}</span></div>
                     <div class="summary-row"><span>Subtotal:</span><span>{{ number_format($sale->subtotal, 0) }}</span></div>
-                    <div class="summary-row"><span>Discount:</span><span>{{ number_format($sale->discount_amount, 0) }}</span></div>
+                    @if($sale->misc_amount <= 0)
+                        {{-- Add negative misc to discount --}}
+                        <div class="summary-row"><span>Discount:</span><span>{{ number_format($sale->discount_amount + abs($sale->misc_amount), 0) }}</span></div>
+                    @elseif($sale->misc_amount > 0)
+                        {{-- Positive misc shown separately --}}
+                        <div class="summary-row"><span>Dispatch/Misc Charges:</span><span>{{ number_format($sale->misc_amount, 0) }}</span></div>
+                    @endif
                     @if($sale->refund_amount > 0)
                     <div class="summary-row r-bold"><span>Refunded:</span><span>{{ number_format($sale->refund_amount, 0) }}</span></div>
                     @endif
                     <div class="r-solid"></div>
-                    <div class="summary-row total"><span>TOTAL:</span><span>{{ number_format($sale->total, 0) }}</span></div>
+                    <div class="summary-row total"><span>TOTAL:</span>
+                    	
+                        <span>
+                            {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 0) }}
+                        </span>
+                        
+                    </div>
 
                     <div class="r-divider"></div>
                     <div class="r-center r-center-footer">Thank you for choosing us.</div>
@@ -157,9 +170,63 @@
                 </div>
             </div>
         </div>
+        
+        {{-- Return Form --}}
+@if($sale->status !== 'returned') {{-- Only show if sale not fully returned --}}
+<div class="card mt-4 no-print">
+    <div class="card-header"><h5><i class="bi bi-arrow-counterclockwise me-2"></i>Process Return</h5></div>
+    <div class="card-body">
+        <form action="{{ route('sales.return', $sale) }}" method="POST">
+            @csrf
+            <table class="table mb-3" style="font-size:14px;">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty Sold</th>
+                        <th>Already Returned</th>
+                        <th>Return Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($sale->items as $item)
+                    @php
+                        $maxReturn = $item->quantity - $item->returned_qty;
+                    @endphp
+                    <tr>
+                        <td>{{ $item->product_name }}{{ $item->custom_name ? ' *' : '' }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->returned_qty }}</td>
+                        <td>
+                            <input type="number" name="items[{{ $item->id }}][qty]" 
+                                   value="0" min="0" max="{{ $maxReturn }}" class="form-control form-control-sm"
+                                   {{ $maxReturn <= 0 ? 'disabled' : '' }}>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="mb-3">
+                <label for="return_note" class="form-label">Return Note (optional)</label>
+                <input type="text" name="return_note" id="return_note" class="form-control" maxlength="255">
+            </div>
+
+            <button type="submit" class="btn btn-danger btn-sm">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Process Return
+            </button>
+        </form>
+    </div>
+</div>
+@endif
+        
+        
     </div>
 
     {{-- Right: Screen-only invoice details --}}
+    
+    
+    
+    
     <div class="col-lg-7 no-print">
         <div class="card mb-4">
             <div class="card-header"><h5><i class="bi bi-list-ul me-2"></i>Items</h5></div>
@@ -202,17 +269,56 @@
         </div>
 
         <div class="card">
-            <div class="card-header"><h5><i class="bi bi-calculator me-2"></i>Summary</h5></div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Subtotal</span><span>{{ number_format($sale->subtotal, 0) }} Rs</span></div>
-                <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Discount</span><span class="text-success fw-semibold">{{ number_format($sale->discount_amount, 0) }} Rs</span></div>
-                @if($sale->refund_amount > 0)
-                <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Refunded</span><span class="fw-bold text-info">{{ number_format($sale->refund_amount, 0) }} Rs</span></div>
-                @endif
-                <div class="d-flex justify-content-between py-2"><span class="fw-bold">Total</span><span class="fw-bold">{{ number_format($sale->total, 0) }} Rs</span></div>
-            </div>
+    <div class="card-header"><h5><i class="bi bi-calculator me-2"></i>Summary</h5></div>
+    <div class="card-body">
+
+        {{-- Total items --}}
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Total Items</span>
+            <span>{{ $sale->items->sum('quantity') }}</span>
+        </div>
+
+        {{-- Subtotal --}}
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Subtotal</span>
+            <span>{{ number_format($sale->subtotal, 0) }} Rs</span>
+        </div>
+
+        {{-- Discount (include negative misc if any) --}}
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Discount</span>
+            <span class="text-success fw-semibold">
+                {{ number_format($sale->discount_amount + ($sale->misc_amount < 0 ? abs($sale->misc_amount) : 0), 0) }} Rs
+            </span>
+        </div>
+
+        {{-- Positive Dispatch / Misc Charges --}}
+        @if($sale->misc_amount > 0)
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Dispatch / Misc Charges</span>
+            <span class="fw-semibold">{{ number_format($sale->misc_amount, 0) }} Rs</span>
+        </div>
+        @endif
+
+        {{-- Refunded --}}
+        @if($sale->refund_amount > 0)
+        <div class="d-flex justify-content-between py-2 border-bottom">
+            <span class="text-muted">Refunded</span>
+            <span class="fw-bold text-info">{{ number_format($sale->refund_amount, 0) }} Rs</span>
+        </div>
+        @endif
+
+        {{-- Total --}}
+        <div class="d-flex justify-content-between py-2">
+            <span class="fw-bold">Total</span>
+            <span class="fw-bold">
+                {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 0) }} Rs
+            </span>
         </div>
     </div>
+</div>
+    
+    
 </div>
 
 @if(session('print') == '1')

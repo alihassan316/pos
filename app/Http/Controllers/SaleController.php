@@ -12,11 +12,19 @@ use DB;
 class SaleController extends Controller
 {
     // 1️⃣ List previous sales / invoices
-    public function index()
-    {
-        $sales = Sale::latest()->paginate(10);
-        return view('sales.index', compact('sales'));
-    }
+    public function index(Request $request)
+	{
+		$query = Sale::query();
+	
+		// Filter by invoice number
+		if ($request->filled('invoice')) {
+			$query->where('invoice_number', 'LIKE', '%' . $request->invoice . '%');
+		}
+	
+		$sales = $query->latest()->paginate(10)->withQueryString();
+	
+		return view('sales.index', compact('sales'));
+	}
 
     // 2️⃣ Show invoice page to create new sale
     public function create()
@@ -76,6 +84,8 @@ class SaleController extends Controller
 			$paid = floatval($request->paid_amount ?? 0);
 			$due  = $grandTotal - $paid;
 			
+			$misc = floatval($request->misc_amount ?? 0);
+			
 			$sale = Sale::create([
 				'invoice_number'  => $invoiceNumber,
 			
@@ -83,8 +93,8 @@ class SaleController extends Controller
 				'discount_type'   => $discountType,
 				'discount_value'  => $discountValue,
 				'discount_amount' => $discountAmount,
-			
-				'total'           => $grandTotal,
+				'misc_amount'     => $misc,
+				'total'           => $subtotal - $discountAmount + $misc,
 				'paid_amount'     => $paid,
 				'due_amount'      => $due < 0 ? 0 : $due,
 			
@@ -105,6 +115,9 @@ class SaleController extends Controller
 */
 
             foreach ($request->products as $item) {
+				
+				if($item['quantity'] > 0 && $item['unit_price'] > 0){
+				
                 $productId  = !empty($item['product_id']) && $item['product_id'] != '0'
                               ? $item['product_id'] : null;
                 $customName = $productId ? null : ($item['custom_name'] ?? 'Custom Item');
@@ -143,6 +156,7 @@ class SaleController extends Controller
                         $product->save();
                     }
                 }
+				}
             }
         });
 

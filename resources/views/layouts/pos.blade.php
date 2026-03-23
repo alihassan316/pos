@@ -8,6 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+		svg.h-5{
+			width:30px;
+		}
         :root {
             --sidebar-width: 240px;
             --primary: #4f46e5;
@@ -218,7 +221,9 @@
 <div class="sidebar">
     <div class="sidebar-brand">
         <div class="d-flex align-items-center">
-            <div class="brand-icon"><i class="bi bi-shop"></i></div>
+            <div class="brand-icon1">
+            	<img src="{{asset('images/logor.png')}}" style="width:50px;" />
+            </div>
             <div>
                 <span>Asad Med Store</span>
                 <small>Invoice System</small>
@@ -241,14 +246,28 @@
         <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">
             <i class="bi bi-box-seam"></i> Products
         </a>
+        
+         <li class="nav-item">
+            <a href="{{ route('suppliers.index') }}" class="{{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                <i class="bi bi-truck"></i> Suppliers
+            </a>
+        </li>
 
         <div class="nav-section-label mt-2">Sales</div>
         <a href="{{ route('sales.create') }}" class="{{ request()->routeIs('sales.create') ? 'active' : '' }}">
-            <i class="bi bi-plus-circle"></i> New Sale
+            <i class="bi bi-plus-circle"></i> New Sale (Ctrl + U)
         </a>
         <a href="{{ route('sales.index') }}" class="{{ request()->routeIs('sales.index') || request()->routeIs('sales.show') ? 'active' : '' }}">
             <i class="bi bi-receipt"></i> Sales History
         </a>
+        
+        <div class="nav-section-label mt-2">Settings</div>
+        <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">
+            <i class="bi bi-receipt"></i> Settings
+        </a>
+        
+       
+        
     </div>
 
     <div class="sidebar-footer">
@@ -277,7 +296,7 @@
 
         <div class="topbar-right">
             <a href="{{ route('sales.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-lg me-1"></i> New Sale
+                <i class="bi bi-plus-lg me-1"></i> New Sale (Ctrl + U)
             </a>
             @auth
             <div class="topbar-user">
@@ -337,6 +356,26 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+
+document.addEventListener('keydown', function(e) {
+    // Ignore if focus is in input, textarea, or contenteditable
+    const target = e.target;
+    if (['INPUT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable) return;
+
+    // Ctrl + U → same tab
+    if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        window.location.href = "{{ route('sales.create') }}";
+    }
+
+    // Ctrl + Shift + U → new tab
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        window.open("{{ route('sales.create') }}", "_blank");
+    }
+});
+
 </script>
 
 </body>

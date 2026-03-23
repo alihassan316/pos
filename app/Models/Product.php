@@ -15,20 +15,29 @@ class Product extends Model
         'name',
         'sku',
         'barcode',
-        'buy_price',
+		'buy_price',
         'sell_price',
+		'unit_sell_price',
         'current_stock',
-		'discount',
+        'discount',
 		'company',
-		'supplier',
-		'contact',
-		'expiry',
+		'batch_no',
+		'gst',
+        'expiry',
         'status',
+		'is_box',
+    	'items_per_box',
     ];
 
-    // Optional: relationship with category (if created)
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class)
+            ->withPivot(['buy_price', 'qty'])
+            ->withTimestamps();
     }
 }

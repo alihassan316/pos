@@ -20,14 +20,19 @@ Route::middleware(['auth'])->group(function () {
 
     // Products (protected)
     Route::resource('products', ProductController::class);
+	
+	Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
 
     // Sales (protected)
     Route::resource('sales', SaleController::class);
     Route::post('sales/{sale}/pay-due', [SaleController::class, 'payDue'])->name('sales.pay-due');
     Route::post('sales/{sale}/return', [SaleController::class, 'processReturn'])->name('sales.return');
+	Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
 
     // Ajax product search for Sale page
     Route::get('/api/products/search', [ProductController::class, 'search'])->name('products.search');
+	
+	Route::get('/settings', [DashboardController::class, 'settings'])->name('settings');
 
     // Profile (already protected)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

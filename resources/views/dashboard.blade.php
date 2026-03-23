@@ -15,6 +15,23 @@
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#ef4444,#dc2626);">
+            <div class="stat-icon"><i class="bi bi-arrow-down-up"></i></div>
+            <div class="stat-value">
+                {{ number_format($todaySales , 2) }} Rs
+            </div>
+            <div class="stat-label">Today Gross Sales</div>
+            <div class="stat-sub">
+                Refund: {{ number_format($todayRefund, 2) }} Rs
+            </div>
+            <div class="stat-value">
+                {{ number_format($todaySales - $todayRefund, 2) }} Rs
+            </div>
+            <div class="stat-label">Today Net Sales</div>
+            
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
         <div class="stat-card" style="background: linear-gradient(135deg,#0ea5e9,#0284c7);">
             <div class="stat-icon"><i class="bi bi-calendar-month"></i></div>
             <div class="stat-value">{{ number_format($monthlySales, 2) }} Rs</div>
@@ -30,14 +47,8 @@
             <div class="stat-sub">{{ $lowStockCount }} low stock</div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="background: linear-gradient(135deg,#f59e0b,#d97706);">
-            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
-            <div class="stat-value">{{ number_format($totalDue, 2) }} Rs</div>
-            <div class="stat-label">Total Due</div>
-            <div class="stat-sub">{{ $pendingCount }} pending invoice(s)</div>
-        </div>
-    </div>
+    
+    
 </div>
 
 <div class="row g-4">
@@ -53,10 +64,11 @@
                     <thead>
                         <tr>
                             <th>Invoice</th>
+                            <th>Sub Total</th>
+                            <th>Discount</th>
+                            <th>Misc</th>
+                            <th>Refund</th>
                             <th>Total</th>
-                            <th>Paid</th>
-                            <th>Due</th>
-                            <th>Status</th>
                             <th>Date</th>
                         </tr>
                     </thead>
@@ -65,17 +77,16 @@
                         <tr>
                             <td><a href="{{ route('sales.show', $sale) }}" class="text-decoration-none fw-semibold text-primary">{{ $sale->invoice_number }}</a></td>
                             <td>{{ number_format($sale->total, 2) }} Rs</td>
-                            <td>{{ number_format($sale->paid_amount, 2) }} Rs</td>
-                            <td>{{ number_format($sale->due_amount, 2) }} Rs</td>
-                            <td>
-                                @if($sale->status == 'paid')
-                                    <span class="badge bg-success">Paid</span>
-                                @elseif($sale->status == 'partial')
-                                    <span class="badge bg-warning text-dark">Partial</span>
-                                @else
-                                    <span class="badge bg-secondary">Pending</span>
-                                @endif
-                            </td>
+                            <td>{{ number_format($sale->discount, 2) }} Rs</td>
+                            <td>{{ number_format($sale->misc_amount, 2) }} Rs</td>
+                            <td>{{ number_format($sale->refund_amount, 2) }} Rs</td>
+                            <td class="fw-bold">
+                {{ number_format(
+                    $sale->subtotal 
+                    - $sale->discount_amount 
+                    - $sale->refund_amount 
+                    + $sale->misc_amount, 
+                2) }} Rs</td>
                             <td>{{ $sale->created_at->format('d M Y') }}</td>
                         </tr>
                         @empty
@@ -122,7 +133,59 @@
                 </table>
             </div>
         </div>
+    
+    <hr />
+    <div class="col-xl-12">
+    <div class="card">
+        <div class="card-header">
+            <h5>
+                <i class="bi bi-calendar-x me-2 text-danger"></i>
+                Expiry Alerts
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($expiryProducts as $product)
+                    @php
+                        $isExpired = \Carbon\Carbon::parse($product->expiry)->isPast();
+                    @endphp
+                    <tr>
+                        <td>
+                            <div class="fw-semibold" style="font-size:13px;">
+                                {{ $product->name }}
+                            </div>
+                            <div class="text-muted" style="font-size:11px;">
+                                {{ $product->company }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {{ $isExpired ? 'bg-danger' : 'bg-warning text-dark' }}">
+                                {{ \Carbon\Carbon::parse($product->expiry)->format('d M Y') }}
+                            </span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="2" class="text-center text-muted py-4">
+                            No expiry alerts
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
+</div></div>
+    
 </div>
 
 @endsection

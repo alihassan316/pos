@@ -7,7 +7,56 @@ use App\Models\Sale;
 
 class DashboardController extends Controller
 {
-    public function index()
+	
+	public function index()
+{
+    $today = now()->toDateString();
+    $monthStart = now()->startOfMonth();
+    $nextMonth = now()->addMonth();
+
+    // Sales
+    $todaySales   = Sale::whereDate('created_at', $today)->sum('total');
+    $todayCount   = Sale::whereDate('created_at', $today)->count();
+
+    $monthlySales  = Sale::where('created_at', '>=', $monthStart)->sum('total');
+    $monthlyCount  = Sale::where('created_at', '>=', $monthStart)->count();
+
+    // Refunds (NEW)
+    $todayRefund = Sale::whereDate('created_at', $today)->sum('refund_amount');
+
+    // Products
+    $totalProducts  = Product::count();
+    $lowStockCount  = Product::where('current_stock', '<=', 10)->count();
+    $lowStockProducts = Product::where('current_stock', '<=', 10)
+        ->orderBy('current_stock')
+        ->take(20)
+        ->get();
+
+    // Expiry Products (NEW)
+    $expiryProducts = Product::whereNotNull('expiry')
+        ->whereDate('expiry', '<=', $nextMonth)
+        ->orderBy('expiry')
+        ->take(20)
+        ->get();
+
+    // Due
+    $totalDue      = Sale::where('status', '!=', 'paid')->sum('due_amount');
+    $pendingCount  = Sale::whereIn('status', ['pending', 'partial'])->count();
+
+    $recentSales   = Sale::latest()->take(8)->get();
+
+    return view('dashboard', compact(
+        'todaySales', 'todayCount',
+        'monthlySales', 'monthlyCount',
+        'todayRefund',
+        'totalProducts', 'lowStockCount', 'lowStockProducts',
+        'expiryProducts',
+        'totalDue', 'pendingCount',
+        'recentSales'
+    ));
+}
+
+    public function index_old()
     {
         $today = now()->toDateString();
         $monthStart = now()->startOfMonth();
@@ -35,4 +84,8 @@ class DashboardController extends Controller
             'recentSales'
         ));
     }
+	
+	public function settings(){
+		return view('settings');	
+	}
 }

@@ -145,6 +145,18 @@
         <input type="hidden" name="discount_value" id="hiddenDiscountValue">
     
     </div>
+    
+    <div class="mb-3 d-flex align-items-center gap-2">
+        <div class="input-group">
+            <input type="number" id="miscAmount" class="form-control" step="0.01" value="0">
+            <span class="input-group-text">Misc</span>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="miscNegative">
+            <label class="form-check-label" for="miscNegative">Negative</label>
+        </div>
+    </div>
+    <input type="hidden" name="misc_amount" id="hiddenMiscAmount" value="0">
 
     <!-- Grand Total -->
     <div class="d-flex justify-content-between py-2 border-top mb-2">
@@ -153,7 +165,7 @@
     </div>
 
     <!-- Paid Amount -->
-    <div class="mb-3">
+    <div class="mb-3" style="display:none;">
         <label class="form-label">Paid Amount</label>
         <div class="input-group">
             <span class="input-group-text">Rs</span>
@@ -163,7 +175,7 @@
     </div>
 
     <!-- Due -->
-    <div class="d-flex justify-content-between py-2 border-top mb-3">
+    <div class="d-flex1 justify-content-between py-2 border-top mb-3" style="display:none;">
         <span class="text-muted">Due Amount</span>
         <span class="fw-bold text-danger" id="dueAmount">Rs 0</span>
     </div>
@@ -247,7 +259,9 @@
     }
 	
 	document.getElementById("discountValue").addEventListener("input", calculateGrandTotal);
-document.getElementById("discountIsPercent").addEventListener("change", calculateGrandTotal);
+	document.getElementById("discountIsPercent").addEventListener("change", calculateGrandTotal);
+	document.getElementById("miscAmount").addEventListener("input", calculateGrandTotal);
+	document.getElementById("miscNegative").addEventListener("change", calculateGrandTotal);
 	
 	function calculateGrandTotal() {
 		var subtotal = 0;
@@ -273,12 +287,17 @@ document.getElementById("discountIsPercent").addEventListener("change", calculat
 		}
 	
 		if (discountAmount > subtotal) discountAmount = subtotal;
+		
+		var misc = parseFloat(document.getElementById("miscAmount").value) || 0;
+    	var isNegative = document.getElementById("miscNegative").checked;
+    	if (isNegative) misc = -misc;
 	
 		// save to DB
 		document.getElementById("hiddenDiscountType").value = discountValue > 0 ? (isPercent ? "percent" : "fixed") : "none";
-		document.getElementById("hiddenDiscountValue").value = discountValue > 0 ? discountValue : 0;
+    	document.getElementById("hiddenDiscountValue").value = discountValue > 0 ? discountValue : 0;
+    	document.getElementById("hiddenMiscAmount").value = misc;
 	
-		var grandTotal = subtotal - discountAmount;
+		var grandTotal = subtotal - discountAmount + misc;
 		if (grandTotal < 0) grandTotal = 0;
 	
 		document.getElementById("grandTotal").textContent = "Rs " + grandTotal.toLocaleString();
@@ -288,6 +307,33 @@ document.getElementById("discountIsPercent").addEventListener("change", calculat
 	
 		// Due always 0 in auto-pay mode
 		document.getElementById("dueAmount").textContent = "Rs 0";
+		
+		document.addEventListener('keydown', function(e) {
+			// Ignore if focus is in input, textarea, or contenteditable
+			const target = e.target;
+			if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) return;
+		
+		/*
+			if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z') {
+				e.preventDefault();
+				const addBtn = document.getElementById('addRow');
+				if (addBtn) addBtn.click();
+			}
+		*/	
+			if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'x') {
+    e.preventDefault();
+    const tbody = document.querySelector("#invoiceTable tbody");
+    const rows = tbody.querySelectorAll("tr");
+    if (rows.length > 1) {
+        // Always remove the last row (no conditions on data)
+        tbody.removeChild(rows[rows.length - 1]);
+        calculateGrandTotal();
+    }
+}
+		
+		});
+		
+		
 	}
 	
     function calculateGrandTotal_total() {
@@ -441,6 +487,7 @@ document.getElementById("discountIsPercent").addEventListener("change", calculat
 
 document.addEventListener("keydown", function(e) {
     // Ctrl + N = Add new row
+	/*
     if (e.ctrlKey && e.key.toLowerCase() === "n") {
         e.preventDefault(); // stop browser from opening new window
         document.getElementById("addRow").click(); // trigger existing Add Row button
@@ -452,6 +499,7 @@ document.addEventListener("keydown", function(e) {
             input.tomselect.focus();
         }
     }
+	*/
 
     // Ctrl + S = Submit sale
     if (e.ctrlKey && e.key.toLowerCase() === "s") {
@@ -467,6 +515,23 @@ document.addEventListener("keydown", function(e) {
         document.getElementById("saleForm").submit();
     }
 });
+
+
+document.addEventListener('keydown', function(e) {
+			// Ignore if focus is in input, textarea, or contenteditable
+			const target = e.target;
+			if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) return;
+		
+			// Ctrl + Z → click Add Item button
+			if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z') {
+				e.preventDefault();
+				const addBtn = document.getElementById('addRow');
+				if (addBtn) addBtn.click();
+			}
+			
+			
+		
+		});
 
 
 </script>

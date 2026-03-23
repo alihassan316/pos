@@ -25,6 +25,7 @@
                     
                     <th>Buy Price</th>
                     <th>Sell Price</th>
+                    <th>Unit Price</th>
                     <th>Discount</th>
                     <th>Stock</th>
                     <th>Status</th>
@@ -45,6 +46,7 @@
                     
                     <td>{{ number_format($product->buy_price, 2) }} Rs</td>
                     <td>{{ number_format($product->sell_price, 2) }} Rs</td>
+                    <td>{{ number_format($product->unit_sell_price && $product->unit_sell_price > 0 ? $product->unit_sell_price : $product->sell_price, 2) }} Rs</td>
                     <td>
                     	@if($product->discount != "")
                         	{{$product->discount}}%
