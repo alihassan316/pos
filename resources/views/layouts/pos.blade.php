@@ -220,8 +220,8 @@
         <div class="d-flex align-items-center">
             <div class="brand-icon"><i class="bi bi-shop"></i></div>
             <div>
-                <span>QuickPOS</span>
-                <small>Point of Sale</small>
+                <span>Asad Med Store</span>
+                <small>Invoice System</small>
             </div>
 
             <button class="sidebar-close-btn d-md-none">

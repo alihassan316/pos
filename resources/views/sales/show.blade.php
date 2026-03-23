@@ -139,7 +139,7 @@
                     <div class="r-divider"></div>
                     <div class="r-center" style="margin-top:6px;font-size:10px;">Thank you for choosing us.</div>
                     <div class="r-center" style="font-size:10px;">We look forward to serving you again.</div>
-                    <div class="r-center" style="font-size:8px; margin-top:4px;">
+                    <div class="r-center" style="font-size:8px; margin-top:4px;margin-bottom: 5px;">
                         Developed by BheraDigital.com | <b>Ali Hassan</b> 0300-8937983
                     </div>
                 </div>
@@ -463,7 +463,7 @@
     {{-- Footer --}}
     <div class="r-center" style="margin-top:6px;font-size:10px;">Thank you for choosing us.</div>
     <div class="r-center" style="font-size:10px;">We look forward to serving you again.</div>
-    <div class="r-center" style="font-size:8px; margin-top:4px;">
+    <div class="r-center" style="font-size:8px; margin-top:4px;margin-bottom: 5px;">
         Developed by BheraDigital.com | <b>Ali Hassan</b> 0300-8937983
     </div>
 </div>
