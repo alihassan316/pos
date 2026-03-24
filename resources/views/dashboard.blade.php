@@ -56,7 +56,7 @@
     <div class="col-xl-8">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5><i class="bi bi-receipt me-2 text-primary"></i>Recent Sales</h5>
+                <h5><i class="bi bi-receipt me-2 text-primary"></i>Latest Sales</h5>
                 <a href="{{ route('sales.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body p-0">
