@@ -14,6 +14,27 @@
     </a>
 </div>
 
+<form method="GET" action="{{ route('products.index') }}" class="mb-3">
+    <div class="input-group">
+        <input 
+            type="text" 
+            name="search" 
+            value="{{ request('search') }}"
+            class="form-control"
+            placeholder="Search by name, company or ingredients..."
+        >
+        <button class="btn btn-primary" type="submit">
+            <i class="bi bi-search"></i> Search
+        </button>
+
+        @if(request('search'))
+        <a href="{{ route('products.index') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i>
+        </a>
+        @endif
+    </div>
+</form>
+
 <div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">

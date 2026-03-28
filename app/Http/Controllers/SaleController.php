@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\SaleReturnItem;
+use App\Models\SaleReturn;
 use Illuminate\Support\Str;
 use DB;
 
@@ -196,7 +198,7 @@ class SaleController extends Controller
     }
 
     // 6️⃣ Process return / refund
-    public function processReturn(Request $request, Sale $sale)
+    public function processReturn_old(Request $request, Sale $sale)
     {
         $request->validate([
             'items'       => 'required|array',
@@ -250,4 +252,81 @@ class SaleController extends Controller
         return redirect()->route('sales.show', $sale)
             ->with('success', 'Return processed successfully.');
     }
+	
+	public function processReturn(Request $request, Sale $sale)
+{
+    $request->validate([
+        'items'       => 'required|array',
+        'items.*.qty' => 'required|integer|min:0',
+        'return_note' => 'nullable|string|max:255',
+    ]);
+
+    DB::transaction(function () use ($request, $sale) {
+
+        $refundTotal = 0;
+        $returnItems = [];
+
+        foreach ($request->items as $itemId => $data) {
+
+            $returnQty = (int) $data['qty'];
+            if ($returnQty <= 0) continue;
+
+            $item = SaleItem::find($itemId);
+            if (!$item || $item->sale_id !== $sale->id) continue;
+
+            $maxReturnable = $item->quantity - $item->returned_qty;
+            $returnQty     = min($returnQty, $maxReturnable);
+
+            if ($returnQty <= 0) continue;
+
+            // Update returned qty on sale_items
+            $item->increment('returned_qty', $returnQty);
+
+            $lineRefund = $returnQty * $item->unit_price;
+            $refundTotal += $lineRefund;
+
+            // Restore stock
+            if ($item->product) {
+                $item->product->increment('current_stock', $returnQty);
+            }
+
+            // Collect return items for insertion
+            $returnItems[] = [
+                'sale_item_id' => $item->id,
+                'product_id'   => $item->product_id,
+                'qty'          => $returnQty,
+                'unit_price'   => $item->unit_price,
+            ];
+        }
+
+        // If no refund, skip DB operations
+        if ($refundTotal <= 0) {
+            return;
+        }
+
+        // Insert into sale_returns
+        $return = SaleReturn::create([
+            'sale_id'       => $sale->id,
+            'refund_amount' => $refundTotal,
+            'return_note'   => $request->return_note,
+        ]);
+
+        // Insert items
+        foreach ($returnItems as $r) {
+            $r['sale_return_id'] = $return->id;
+            SaleReturnItem::create($r);
+        }
+
+        // Determine return status
+        $sale->load('items');
+        $allReturned = $sale->items->every(fn($i) => $i->returned_qty >= $i->quantity);
+
+        $sale->status = $allReturned ? 'returned' : 'partial_return';
+        $sale->save();
+    });
+
+    return redirect()
+        ->route('sales.show', $sale)
+        ->with('success', 'Return processed successfully.');
+}
 }

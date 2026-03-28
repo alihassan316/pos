@@ -9,11 +9,25 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     // List products
-    public function index()
-    {
-        $products = Product::latest()->paginate(10);
-        return view('products.index', compact('products'));
-    }
+   public function index(Request $request)
+	{
+		$query = Product::query();
+	
+		if ($request->search) {
+			$search = $request->search;
+	
+			$query->where(function($q) use ($search) {
+				$q->where('name', 'LIKE', "%{$search}%")
+				  ->orWhere('company', 'LIKE', "%{$search}%")
+				  ->orWhere('ingredient', 'LIKE', "%{$search}%");
+			});
+		}
+	
+		$products = $query->orderBy('name')->paginate(10);
+		$products->appends(['search' => $request->search]); // Keep search in pagination links
+	
+		return view('products.index', compact('products'));
+	}
 
     // Show create form
     public function create()

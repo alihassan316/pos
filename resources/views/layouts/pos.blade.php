@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'POS System')</title>
+    <title>@yield('title', 'Sale System')</title>
     @vite('resources/js/app.js')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -241,10 +241,18 @@
         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <i class="bi bi-grid-1x2"></i> Dashboard
         </a>
+        <a href="{{ route('summary') }}" class="{{ request()->routeIs('summary') ? 'active' : '' }}">
+            <i class="bi bi-grid-1x2"></i> Summary
+        </a>
 
         <div class="nav-section-label mt-2">Inventory</div>
+        
+		<a href="{{ route('purchases.index') }}" class="{{ request()->routeIs('purchases.*') ? 'active' : '' }}">
+            <i class="bi bi-box-seam"></i> Invoice Products
+        </a>        
+        
         <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">
-            <i class="bi bi-box-seam"></i> Products
+            <i class="bi bi-box-seam"></i> Stock Products
         </a>
         
          <li class="nav-item">
@@ -373,6 +381,11 @@ document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'u') {
         e.preventDefault();
         window.open("{{ route('sales.create') }}", "_blank");
+    }
+	
+	if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        window.location.href = "{{ route('dashboard') }}"; // make sure this route exists
     }
 });
 

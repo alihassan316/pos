@@ -110,8 +110,8 @@
                         <span  class="adress"><i>Near National Bank Phullarwan Road Bhera</i></span>
                     </div>
 
-                    <div class="r-center" style="font-size:15px;"><b>Munir Ahmad (0305-5000778)</b></div>
-                    <div class="r-center" style="font-size:15px;"><b>Asad Ali (0308-0866599) | (0348-6066599)</b></div>
+                    <div class="r-center" style="font-size:15px;">Munir Ahmad (0305-5000778)</div>
+                    <div class="r-center" style="font-size:15px;">Asad Ali (0308-0866599) | (0348-6066599)</div>
 
                     <div class="r-divider"></div>
                     <div class="summary-row"><span>Invoice:</span><span class="r-bold">{{ $sale->invoice_number }}</span></div>

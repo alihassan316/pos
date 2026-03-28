@@ -11,6 +11,16 @@
     .ts-dropdown .option { padding: 7px 12px; }
     .manual-entry-row .product-manual-input { font-size: 13px; }
     .manual-badge { font-size: 10px; vertical-align: middle; }
+	
+	.form-control, .form-select{
+		padding:2px !important;
+	}
+	.sidebar{
+		display:none !important;
+	}
+	.main-wrapper{
+		margin-left:0px !important;
+	}
 </style>
 @endpush
 
@@ -28,7 +38,7 @@
 <form action="{{ route('sales.store') }}" method="POST" id="saleForm">
 @csrf
 <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-9">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5><i class="bi bi-cart3 me-2"></i>Sale Items</h5>
@@ -53,9 +63,9 @@
                         <tr>
                             <td><select name="products[0][product_id]" class="product-select"></select></td>
                             <td><span class="badge bg-secondary stock-badge">0</span></td>
-                            <td><input type="number" name="products[0][quantity]" class="form-control form-control-sm quantity" min="1" value="1"></td>
-                            <td><input type="number" name="products[0][unit_price]" class="form-control form-control-sm unit-price" step="0.01" value="0.00"></td>
-                            <td><input type="number" name="products[0][discount]" class="form-control form-control-sm discount" step="0.01" value="0.00">
+                            <td><input name="products[0][quantity]" class="form-control form-control-sm quantity"  value=""></td>
+                            <td><input  name="products[0][unit_price]" class="form-control form-control-sm unit-price" value=""></td>
+                            <td><input  name="products[0][discount]" class="form-control form-control-sm discount" value="">
                             
                             	
                                 <input type="hidden" name="products[0][item_discount_value]" class="item-discount-value" value="0">
@@ -73,40 +83,13 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
+    <div class="col-lg-3">
         <div class="card">
             <div class="card-header">
                 <h5><i class="bi bi-receipt me-2"></i>Payment</h5>
             </div>
             
-            <!--
-            <div class="card-body">
-                <div class="d-flex justify-content-between py-2 border-bottom mb-2">
-                    <span class="text-muted">Grand Total</span>
-                    <span class="fw-bold fs-5" id="grandTotal">Rs 0</span>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Paid Amount</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rs</span>
-                        <input type="number" name="paid_amount" id="paidAmount" class="form-control" step="0.01" value="0" min="0">
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-top mb-3">
-                    <span class="text-muted">Due Amount</span>
-                    <span class="fw-bold text-danger" id="dueAmount">Rs 0</span>
-                </div>
-                <input type="hidden" name="print" id="printFlag" value="0">
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary py-2" onclick="document.getElementById('printFlag').value='0'">
-                        <i class="bi bi-check-circle me-2"></i> Complete Sale
-                    </button>
-                    <button type="submit" class="btn btn-outline-dark py-2" onclick="document.getElementById('printFlag').value='1'">
-                        <i class="bi bi-printer me-2"></i> Complete &amp; Print Invoice
-                    </button>
-                </div>
-            </div>
-            -->
+           
             
             <div class="card-body">
 
@@ -429,10 +412,10 @@
         tr.innerHTML =
             `<td><select name="products[${i}][product_id]" class="product-select"></select></td>
             <td><span class="badge bg-secondary stock-badge">0</span></td>
-            <td><input type="number" name="products[${i}][quantity]" class="form-control form-control-sm quantity" min="1" value="1"></td>
-            <td><input type="number" name="products[${i}][unit_price]" class="form-control form-control-sm unit-price" step="0.01" value="0.00"></td>
-			<td><input type="number" name="products[${i}][discount]" class="form-control form-control-sm discount" step="0.01" value="0.00">
-			 <input type="hidden" name="products[${i}][item_discount_value]" class="item-discount-value" value="0">
+            <td><input  name="products[${i}][quantity]" class="form-control form-control-sm quantity" ></td>
+            <td><input name="products[${i}][unit_price]" class="form-control form-control-sm unit-price"  value=""></td>
+			<td><input name="products[${i}][discount]" class="form-control form-control-sm discount"  value="">
+			 <input type="hidden" name="products[${i}][item_discount_value]" class="item-discount-value" value="">
     <input type="hidden" name="products[${i}][item_discount_amount]" class="item-discount-amount" value="0">
     <input type="hidden" name="products[${i}][item_discount_type]" class="item-discount-type" value="percent">
 			</td>

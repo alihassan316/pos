@@ -35,6 +35,10 @@
                             <td>Open New Sale Page</td>
                         </tr>
                         <tr>
+                        	<td>Ctrl + V</td>
+                            <td>Open Dashboard</td>
+                        </tr>
+                        <tr>
                         	<td colspan="2">Sale Page</td>
                         </tr>
                         <tr>
