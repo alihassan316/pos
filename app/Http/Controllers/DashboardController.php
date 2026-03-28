@@ -108,14 +108,10 @@ class DashboardController extends Controller
 		$saleDiscount   = $sales->sum('discount_amount');   // Full sale discount
 		$afterDiscount  = $grossSales - $saleDiscount;      // Gross - Discount
 		
-		
-		
 		$totalReturns = SaleReturn::whereDate('created_at', '>=', $from)
                           ->whereDate('created_at', '<=', $to)
                           ->sum('refund_amount');
 		
-		
-	
 		$netSales = $afterDiscount - $totalReturns;
 	
 		// ---- Cost of Sales ----

@@ -50,13 +50,15 @@ class ProductController extends Controller
             })
             ->orderBy('name')
             ->limit(50)
-            ->get(['id', 'name', 'sku', 'barcode', 'discount', 'company', 'sell_price', 'unit_sell_price', 'current_stock']);
+            ->get(['id', 'name', 'sku', 'barcode', 'discount', 'buy_price', 'company', 'sell_price', 'unit_sell_price', 'current_stock']);
 		
 		return response()->json($products->map(function ($p) {
 			
 			$price = ($p->unit_sell_price && $p->unit_sell_price > 0) 
                 ? $p->unit_sell_price 
                 : $p->sell_price;
+				
+			$buyprice = $p->buy_price;
 				
 			return [
 				'value'   => (string) $p->id,
@@ -65,6 +67,7 @@ class ProductController extends Controller
 				'barcode' => $p->barcode,   // include barcode
 				'price'   => $price,
 				'discount' => $p->discount,
+				'buy_price' => $buyprice,
 				'stock'   => $p->current_stock,
 			];
 		}));

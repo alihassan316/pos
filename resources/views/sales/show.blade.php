@@ -140,7 +140,7 @@
                     </table>
 
                     <div class="r-solid"></div>
-                    <div class="total-items"><span>Total Items:</span><span>{{ $sale->items->sum('quantity') }}</span></div>
+                    <div class="total-items"><span>Total Items:</span><span>{{ $sale->items->count() }}</span></div>
                     <div class="summary-row"><span>Subtotal:</span><span>{{ number_format($sale->subtotal, 0) }}</span></div>
                     @if($sale->misc_amount <= 0)
                         {{-- Add negative misc to discount --}}
