@@ -229,6 +229,45 @@ function updateSummary() {
     document.getElementById("totalItems").innerText = totalItems;
     document.getElementById("totalFinal").innerText = totalFinal.toFixed(2);
 }
+
+
+// Enhanced Enter navigation inside product table
+document.querySelector("#productTable").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+        e.preventDefault(); // prevent default form submit / button click
+
+        let input = e.target;
+        let tr = input.closest("tr");
+        let rows = Array.from(document.querySelectorAll("#rows tr"));
+        let inputs = Array.from(tr.querySelectorAll("input, select, textarea"));
+        let inputIdx = inputs.indexOf(input);
+        let rowIdx = rows.indexOf(tr);
+
+        // If not last input in the row, move to next input
+        if(inputIdx < inputs.length - 1){
+            inputs[inputIdx + 1].focus();
+        }
+        else {
+            // Last input of the row reached
+            if(rowIdx === rows.length - 1){
+                // Last row: add new row
+                addRow();
+
+                // Refresh rows array after adding new row
+                rows = Array.from(document.querySelectorAll("#rows tr"));
+                let newRow = rows[rows.length - 1];
+
+                // Focus first input of the new row
+                newRow.querySelector("[name*='name']").focus();
+            } else {
+                // Move to first input of next row
+                rows[rowIdx + 1].querySelector("[name*='name']").focus();
+            }
+        }
+    }
+});
+
+
 </script>
 
 @endsection
