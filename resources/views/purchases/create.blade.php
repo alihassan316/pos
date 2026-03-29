@@ -232,6 +232,7 @@ function updateSummary() {
 
 
 // Enhanced Enter navigation inside product table
+/*
 document.querySelector("#productTable").addEventListener("keydown", function(e){
     if(e.key === "Enter"){
         e.preventDefault(); // prevent default form submit / button click
@@ -266,6 +267,7 @@ document.querySelector("#productTable").addEventListener("keydown", function(e){
         }
     }
 });
+*/
 
 
 </script>
