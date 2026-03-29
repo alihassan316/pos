@@ -95,7 +95,7 @@
 <script>
 
 setInterval(function() {
-	fetch('/keep-alive');
+	fetch("{{ url('keep-alive') }}");
 }, 120000);
 
 
