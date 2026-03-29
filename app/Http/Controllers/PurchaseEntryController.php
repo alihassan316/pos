@@ -43,6 +43,12 @@ class PurchaseEntryController extends Controller
 
     public function store(Request $request)
 {
+	
+	ini_set('max_execution_time', 600);
+	ini_set('memory_limit', '1024M');
+	ini_set('upload_max_filesize', '512M');
+	
+	
     $data = $request->all();
 
     DB::beginTransaction();

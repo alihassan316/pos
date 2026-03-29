@@ -11,6 +11,10 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+Route::get('keep-alive', function(){
+	return response()->json(['status' => 'alive']);
+});
+
 // Dashboard (already protected)
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

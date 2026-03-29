@@ -93,6 +93,12 @@
 </form>
 
 <script>
+
+setInterval(function() {
+	fetch('/keep-alive');
+}, 120000);
+
+
 let rowIndex = 0;
 
 document.getElementById('addRowBtn').addEventListener('click', addRow);
