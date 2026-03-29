@@ -90,6 +90,7 @@
                     <th>GST Flat</th>
                     <th>Final Price</th>
                     <th>Buy Price</th>
+                    <th>Box Price</th>
                     <th>Sale Price</th>
                     <th></th>
                 </tr>
@@ -138,7 +139,7 @@ function addRow() {
             <td><input name="products[${rowIndex}][ingredient]" class="form-control"></td>
             <td><input name="products[${rowIndex}][qty]" class="form-control calc"></td>
             <td><input name="products[${rowIndex}][bonus]" class="form-control calc"></td>
-            <td><input name="products[${rowIndex}][per_pack]" class="form-control"></td>
+            <td><input name="products[${rowIndex}][per_pack]" class="form-control perpack"></td>
             <td><input name="products[${rowIndex}][batch_no]" class="form-control"></td>
             <td><input type="text" placeholder="dd/mm/yyyy"
                        name="products[${rowIndex}][expiry]" class="form-control expiryField"></td>
@@ -159,7 +160,8 @@ function addRow() {
             <td><input name="products[${rowIndex}][gst_flat]" class="form-control calc"></td>
             <td><input name="products[${rowIndex}][final_price]" class="form-control final" readonly></td>
             <td><input name="products[${rowIndex}][buy_price]" class="form-control buy_price" readonly></td>
-            <td><input name="products[${rowIndex}][sale_price]" class="form-control"></td>
+			<td><input name="products[${rowIndex}][box_price]" class="form-control calc box-price"></td>
+			<td><input name="products[${rowIndex}][sale_price]" class="form-control sale-price"></td>
             <td><button class="btn btn-danger btn-sm" onclick="removeRow(this)">X</button></td>
         </tr>
     `;
@@ -229,6 +231,13 @@ document.addEventListener("input", function(e) {
 
         tr.querySelector(".final").value = finalPrice.toFixed(2);
         tr.querySelector(".buy_price").value = buyPrice.toFixed(2);
+		
+		let boxPrice = parseFloat(tr.querySelector("[name*='box_price']")?.value) || 0;
+        let salePriceField = tr.querySelector(".sale-price");
+
+        if (boxPrice > 0 && perPack > 0) {
+            salePriceField.value = (boxPrice / perPack).toFixed(2);
+        }
 
         updateSummary();
     }
@@ -251,6 +260,26 @@ function updateSummary() {
     document.getElementById("totalItems").innerText = totalItems;
     document.getElementById("totalFinal").innerText = totalFinal.toFixed(2);
 }
+
+
+document.addEventListener("input", function (e) {
+    if (
+        !e.target.classList.contains("box-price") &&
+        !e.target.classList.contains("perpack")
+    ) return;
+
+    const row = e.target.closest("tr");
+    const perpackInput = row.querySelector(".perpack");
+    const boxPriceInput = row.querySelector(".box-price");
+    const salePriceInput = row.querySelector(".sale-price");
+
+    const perpack = parseFloat(perpackInput.value) || 1;
+    const boxPrice = parseFloat(boxPriceInput.value) || 0;
+
+    if (perpack > 0 && boxPrice > 0) {
+        salePriceInput.value = (boxPrice / perpack).toFixed(2);
+    }
+});
 
 </script>
 
