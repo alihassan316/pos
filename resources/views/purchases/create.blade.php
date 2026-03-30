@@ -75,7 +75,7 @@
         <table class="table table-bordered" id="productTable">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th style="min-width:250px;">Name</th>
                     <th>Ingredient</th>
                     <th>Qty</th>
                     <th>Bonus</th>

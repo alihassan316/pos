@@ -76,6 +76,8 @@ class PurchaseEntryController extends Controller
             $gstPercent     = floatval($p['gst_percent'] ?? 0);
             $gstFlat        = floatval($p['gst_flat'] ?? 0);
             $perPack        = floatval($p['per_pack'] ?? 1);
+			
+			$final_price_in = floatval($p['final_price'] ??0);
 
             $totalPacks = $qty + $bonus;
 
@@ -104,7 +106,7 @@ class PurchaseEntryController extends Controller
             $discountFlatAmount += $discountFlat;
             $gstPercentAmount += $totalAfterBonus * $gstPercent / 100;
             $gstFlatAmount += $gstFlat;
-            $totalFinal += $finalBuyPrice;
+            $totalFinal += $final_price_in; //$finalBuyPrice;
 
             // Stock in units
             $stockUnits = ($qty + $bonus) * $perPack;
