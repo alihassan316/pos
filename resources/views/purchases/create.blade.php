@@ -122,7 +122,10 @@
 
 // Keep session alive on ANY domain or localhost
 setInterval(function() {
-    fetch("{{ url('keep-alive') }}");
+    fetch("{{ url('keep-alive') }}", {
+        method: "GET",
+        credentials: "include"
+    });
 }, 120000);
 
 let rowIndex = 0;

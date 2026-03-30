@@ -11,8 +11,9 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('keep-alive', function(){
-	return response()->json(['status' => 'alive']);
+Route::get('/keep-alive', function () {
+    session()->put('ping', time());
+    return response()->json(['status' => 'ok']);
 });
 
 // Dashboard (already protected)
