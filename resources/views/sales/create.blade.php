@@ -119,8 +119,8 @@
         <div class="mb-3">
             
             <div class="input-group">
-                <input type="number" id="discountValue" class="form-control" step="0.01"
-               value="0" min="0" placeholder="Discount">
+                <input id="discountValue" class="form-control" 
+               value="" placeholder="Discount">
             </div>
         </div>
         
@@ -133,7 +133,7 @@
     
     <div class="mb-3 d-flex align-items-center gap-2">
         <div class="input-group">
-            <input type="number" id="miscAmount" class="form-control" step="0.01" value="0">
+            <input  id="miscAmount" class="form-control"  value="">
             <span class="input-group-text">Misc</span>
         </div>
         <div class="form-check">
@@ -168,31 +168,74 @@
     <input type="hidden" name="print" id="printFlag" value="0">
 
     <div class="d-grid gap-2">
+       <!--
         <button type="submit" class="btn btn-primary py-2"
             onclick="document.getElementById('printFlag').value='0'">
             <i class="bi bi-check-circle me-2"></i> Complete Sale
         </button>
-
         <button type="submit" class="btn btn-outline-dark py-2"
             onclick="document.getElementById('printFlag').value='1'">
             <i class="bi bi-printer me-2"></i> Complete & Print Invoice
         </button>
+        -->
+        
+        <button type="button" class="btn btn-primary py-2" onclick="triggerManualSubmit(0)">
+            <i class="bi bi-check-circle me-2"></i> Complete Sale
+        </button>
+        <button type="button" class="btn btn-outline-dark py-2" onclick="triggerManualSubmit(1)">
+        	<i class="bi bi-printer me-2"></i> Complete & Print Invoice
+    	</button>
+
+        
     </div>
 </div>
             
-            
-            
-            
+           
             
         </div>
     </div>
 </div>
 </form>
+
+
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Authorization Required</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Enter Password</label>
+                    <input type="password" id="auth_password_input" class="form-control" autocomplete="off">
+                    <div id="passwordError" class="text-danger small mt-1" style="display:none;">Incorrect password!</div>
+                </div>
+                <div class="d-grid">
+                    <button type="button" id="confirmPasswordBtn" class="btn btn-primary">Confirm Sale</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
+
+
+	function triggerManualSubmit(printMode) {
+		// This allows the UI buttons to trigger the same logic as the hotkeys
+		const event = new KeyboardEvent('keydown', {
+			key: printMode === 1 ? 'p' : 's',
+			ctrlKey: true
+		});
+		document.dispatchEvent(event);
+	}
+
 (function () {
     var rowIndex = 1;
     var searchUrl = "{{ route('products.search') }}";
@@ -229,7 +272,10 @@
 	
 		calculateGrandTotal();
 }
+
+
 	
+
     function calculateRow_old(row) {
         var qty = parseFloat(row.querySelector(".quantity").value) || 0;
         var price = parseFloat(row.querySelector(".unit-price").value) || 0;
@@ -474,38 +520,95 @@
     });
 })();
 
+(function() {
+    const REQUIRED_PASSWORD = "1234"; // Set your password here
+    let currentPrintMode = 0;
+    const passModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    const passInput = document.getElementById('auth_password_input');
+    const passError = document.getElementById('passwordError');
 
-document.addEventListener("keydown", function(e) {
-    // Ctrl + N = Add new row
-	/*
-    if (e.ctrlKey && e.key.toLowerCase() === "n") {
-        e.preventDefault(); // stop browser from opening new window
-        document.getElementById("addRow").click(); // trigger existing Add Row button
-        // focus last row product input
-        var tbody = document.querySelector("#invoiceTable tbody");
-        var lastRow = tbody.rows[tbody.rows.length - 1];
-        var input = lastRow.querySelector(".product-select");
-        if (input && input.tomselect) {
-            input.tomselect.focus();
+    // 1. Prevent "Enter" from submitting the main form automatically
+    document.getElementById("saleForm").addEventListener("keydown", function(e) {
+        if (e.key === "Enter" && e.target.tagName === "INPUT") {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // 2. Function to show the modal
+    function showPasswordAuth(printMode) {
+        currentPrintMode = printMode;
+        passInput.value = ""; // Clear previous
+        passError.style.display = "none";
+        passModal.show();
+        setTimeout(() => passInput.focus(), 500); // Focus input when modal opens
+    }
+
+    // 3. Handle Hotkeys (Ctrl+S and Ctrl+P)
+    document.addEventListener("keydown", function(e) {
+        if (e.ctrlKey && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+            showPasswordAuth(0);
+        }
+        if (e.ctrlKey && e.key.toLowerCase() === "p") {
+            e.preventDefault();
+            showPasswordAuth(1);
+        }
+    });
+
+    // 4. Handle Password Submission
+    function verifyAndSubmit() {
+        if (passInput.value === REQUIRED_PASSWORD) {
+            document.getElementById("printFlag").value = currentPrintMode;
+            document.getElementById("saleForm").submit();
+        } else {
+            passError.style.display = "block";
+            passInput.classList.add('is-invalid');
+            passInput.value = "";
         }
     }
-	*/
 
-    // Ctrl + S = Submit sale
+    // Click confirm button
+    document.getElementById('confirmPasswordBtn').addEventListener('click', verifyAndSubmit);
+
+    // Press Enter inside the password input
+    passInput.addEventListener('keydown', function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            verifyAndSubmit();
+        }
+    });
+
+    // 5. Connect UI Buttons (Optional helper for your HTML buttons)
+    window.triggerManualSubmit = function(printMode) {
+        showPasswordAuth(printMode);
+    };
+})();
+
+/*
+document.addEventListener("keydown", function(e) {
+	const REQUIRED_PASSWORD = "1234";
+	function validateAndSubmit(printMode) {
+        let pass = prompt("Enter Authorization Password to complete sale:"); 
+        if (pass === REQUIRED_PASSWORD) {
+            document.getElementById("printFlag").value = printMode;
+            document.getElementById("saleForm").submit();
+        } else if (pass !== null) {
+            alert("Incorrect password. Access denied.");
+        }
+    }
     if (e.ctrlKey && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        document.getElementById("printFlag").value = 0; // normal save
-        document.getElementById("saleForm").submit();
+        document.getElementById("printFlag").value = 0; 
+		validateAndSubmit(0);
     }
-
-    // Ctrl + P = Submit & Print
     if (e.ctrlKey && e.key.toLowerCase() === "p") {
         e.preventDefault();
         document.getElementById("printFlag").value = 1; // print mode
-        document.getElementById("saleForm").submit();
+		validateAndSubmit(1);
     }
 });
-
+*/
 
 document.addEventListener('keydown', function(e) {
 			// Ignore if focus is in input, textarea, or contenteditable
@@ -522,6 +625,14 @@ document.addEventListener('keydown', function(e) {
 			
 		
 		});
+		
+
+document.getElementById("saleForm").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && e.target.tagName === "INPUT") {
+        e.preventDefault();
+        return false;
+    }
+});
 
 
 </script>

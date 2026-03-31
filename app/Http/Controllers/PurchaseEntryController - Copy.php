@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductsInvoice;
 use App\Models\PurchaseInvoice;
-use App\Models\PurchaseInvoiceTemp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,8 +26,6 @@ class PurchaseEntryController extends Controller
 	public function destroy($id)
 	{
 		$invoice = PurchaseInvoice::findOrFail($id);
-		
-		PurchaseInvoiceTemp::where('invoice_id', $id)->delete();
 	
 		$invoice->productsInvoice()->delete();
 	
@@ -43,201 +40,6 @@ class PurchaseEntryController extends Controller
 		
         return view('purchases.create');
     }
-	
-	public function save_inv(Request $request){
-		$name = $request->company_name;
-		$contact = $request->contact;
-		$invoice_number = $request->invoice_number;
-		$invoice_date = $request->invoice_date;	
-		$notes = $request->notes;
-		
-		$inv = new PurchaseInvoice();
-		$inv->company_name = $name;
-		$inv->contact = $contact;
-		$inv->invoice_number = $invoice_number;
-		$inv->invoice_date = $invoice_date;
-		$inv->notes = $notes;
-		
-		$inv->save();
-		
-		return redirect()->route('invoice.update.page', $inv->id);
-		
-			
-	}
-	
-	public function submitivnoice(Request $request)
-{
-    $invoice = PurchaseInvoice::findOrFail($request->id);
-
-    // Get all temp products for this invoice
-    $tempProducts = PurchaseInvoiceTemp::where('invoice_id', $invoice->id)->get();
-
-    if ($tempProducts->isEmpty()) {
-        return redirect()->back()->with('error', 'No products to submit.');
-    }
-
-    $totalItems = 0;
-    $grossAmount = 0;
-    $discountPercentAmount = 0;
-    $discountFlatAmount = 0;
-    $gstPercentAmount = 0;
-    $gstFlatAmount = 0;
-    $totalFinal = 0;
-
-    DB::beginTransaction();
-
-    try {
-        $productsData = [];
-
-        foreach ($tempProducts as $p) {
-            $qty = floatval($p->qty);
-            $bonus = floatval($p->bonus);
-            $perPack = floatval($p->perpack) ?: 1;
-            $packPrice = floatval($p->packprice);
-            $discountPercent = floatval($p->discount_per);
-            $discountFlat = floatval($p->discount_fix);
-            $gstPercent = floatval($p->gst_per);
-            $gstFlat = floatval($p->gst_fix);
-            $finalPrice = floatval($p->final_price);
-
-            $totalQty = $qty + $bonus;
-            $baseAmount = $qty * $packPrice;
-            $discountAmount = ($baseAmount * $discountPercent / 100) + $discountFlat;
-            $gstAmount = ($baseAmount - $discountAmount) * $gstPercent / 100 + $gstFlat;
-
-            $totalFinal += $finalPrice;
-            $grossAmount += $baseAmount;
-            $discountPercentAmount += $baseAmount * $discountPercent / 100;
-            $discountFlatAmount += $discountFlat;
-            $gstPercentAmount += ($baseAmount - ($baseAmount * $discountPercent / 100) - $discountFlat) * $gstPercent / 100;
-            $gstFlatAmount += $gstFlat;
-            $totalItems++;
-			
-			
-			$mainProduct = \App\Models\Product::firstOrNew(['name' => $p->name]);
-			$mainProduct->shop_id = 1;
-			$mainProduct->category_id = $p->category_id ?? null;
-			$mainProduct->ingredient = $p->ingrediant ?? null;
-			$mainProduct->company = $p->company ?? null;
-			$mainProduct->batch_no = $p->batch;
-			$mainProduct->unit_sell_price = floatval($p->sale_price ?? 0);
-			$mainProduct->sell_price = floatval($p->sale_price ?? 0) * $perPack;
-			$mainProduct->buy_price = floatval($p->buy_price ?? 0);
-			$mainProduct->current_stock = ($mainProduct->current_stock ?? 0) + ($p->qty * $perPack);
-			$mainProduct->is_box = $perPack > 1 ? 1 : 0;
-			$mainProduct->items_per_box = $perPack;
-			$mainProduct->status = 1;
-			$mainProduct->save();
-			
-            $productsData[] = [
-                'name' => $p->name,
-                'ingredient' => $p->ingrediant,
-                'category_id' => $p->category_id ?? null,
-                'company' => $p->company ?? null,
-                'batch_no' => $p->batch,
-                'qty' => $qty,
-                'bonus' => $bonus,
-                'per_pack' => $perPack,
-                'pack_price' => $packPrice,
-                'discount_percent' => $discountPercent,
-                'discount_flat' => $discountFlat,
-                'gst_percent' => $gstPercent,
-                'gst_flat' => $gstFlat,
-                'final_price' => $finalPrice,
-                'sale_price' => $p->sale_price,
-                'expiry' => $p->expiry,
-                'expiry_alert' => $p->expiry_alert,
-            ];
-        }
-
-        // Update invoice totals and mark complete
-        $invoice->update([
-            'total_items' => $totalItems,
-            'gross_amount' => $grossAmount,
-            'discount_percent_amount' => $discountPercentAmount,
-            'discount_flat_amount' => $discountFlatAmount,
-            'gst_percent_amount' => $gstPercentAmount,
-            'gst_flat_amount' => $gstFlatAmount,
-            'total_amount' => $totalFinal,
-            'status' => 1,
-        ]);
-
-        // Save products to final ProductsInvoice table
-        $this->saveProductsInvoice($productsData, $invoice->id);
-
-        // Delete temp products
-        PurchaseInvoiceTemp::where('invoice_id', $invoice->id)->delete();
-
-        DB::commit();
-
-        return redirect()->route('purchases.index')
-            ->with('success', 'Purchase Invoice saved successfully.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-		
-        return redirect()->back()->with('error', 'Error saving invoice: ' . $e->getMessage());
-    }
-}
-	
-	public function deleteRowtemp ($id)
-{
-    try {
-        $row = \App\Models\PurchaseInvoiceTemp::findOrFail($id); // Assuming Product is the row model
-
-        $row->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Row deleted successfully.'
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Row not found or cannot be deleted.'
-        ], 404);
-    }
-}
-	
-	public function addTempRow(Request $request, $invoiceId)
-	{
-		$row = PurchaseInvoiceTemp::create([
-			'invoice_id'    => $invoiceId,
-			'name'          => $request->name,
-			'ingrediant'    => $request->ingrediant,
-			'qty'           => $request->qty,
-			'bonus'         => $request->bonus,
-			'perpack'       => $request->perpack,
-			'batch'         => $request->batch,
-			'expiry'        => $request->expiry,
-			'expiry_alert'  => $request->expiry_alert,
-			'packprice'     => $request->packprice,
-			'discount_per'  => $request->discount_per,
-			'discount_fix'  => $request->discount_fix,
-			'gst_per'       => $request->gst_per,
-			'gst_fix'       => $request->gst_fix,
-			'final_price'   => $request->final_price,
-			'buy_price'     => $request->buy_price,
-			'box_price'     => $request->box_price,
-			'sale_price'    => $request->sale_price,
-		]);
-	
-		return response()->json([
-			'success' => true,
-			'row' => $row
-		]);
-	}
-	
-	public function invoiceUpdate($id)
-	{
-		$invoice = PurchaseInvoice::findOrFail($id);
-	
-		// (Later you will load saved rows here)
-		$products = PurchaseInvoiceTemp::where('invoice_id', $id)->get();
-	
-		return view('purchases.invoice_update', compact('invoice', 'products'));
-	}
 
     public function store(Request $request)
 {
@@ -436,7 +238,7 @@ public function saveProductsInvoice($productsData, $invoiceId)
         $pinv->gst_flat = $gstFlat;
         $pinv->final_buy_price = $finalBuyPrice;
         $pinv->per_pack = $perPack;
-        $pinv->expiry = !empty($p['expiry']) ? \Carbon\Carbon::parse($p['expiry'])->format('Y-m-d') : null;
+        $pinv->expiry = !empty($p['expiry']) ? \Carbon\Carbon::createFromFormat('d/m/Y', $p['expiry'])->format('Y-m-d') : null;
         $pinv->expiry_alert_months = $p['expiry_alert'] ?? null;
         $pinv->unit_sell_price = floatval($p['sale_price'] ?? 0);
         $pinv->sell_price = floatval($p['sale_price'] ?? 0) * $perPack;

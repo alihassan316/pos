@@ -18,7 +18,8 @@ class PurchaseInvoice extends Model
         'gst_percent_amount',
         'gst_flat_amount',
         'total_amount',
-        'notes'
+        'notes',
+		'status'
     ];
 
     //public function products()

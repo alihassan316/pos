@@ -51,7 +51,18 @@ Route::middleware(['auth'])->group(function () {
 	Route::prefix('purchases')->group(function () {
 		Route::get('/', [PurchaseEntryController::class, 'index'])->name('purchases.index');
 		Route::get('/create', [PurchaseEntryController::class, 'create'])->name('purchases.create');
-		Route::post('/store', [PurchaseEntryController::class, 'store'])->name('purchases.store');
+		//Route::post('/store', [PurchaseEntryController::class, 'store'])->name('purchases.store');
+		Route::post('/store', [PurchaseEntryController::class, 'save_inv'])->name('purchases.store');
+		Route::get('/invoice-update/{id}', [PurchaseEntryController::class, 'invoiceUpdate'])
+     ->name('invoice.update.page');
+	 
+	 	Route::post('/invoice/{id}/add-row', [PurchaseEntryController::class, 'addTempRow'])
+    ->name('invoice.add.row');
+		
+		Route::delete('/invoice/row/{id}', [PurchaseEntryController::class, 'deleteRowtemp'])->name('invoice.delete.row');
+		
+		Route::post('/submitivnoice', [PurchaseEntryController::class, 'submitivnoice'])->name('purchases.submitivnoice');
+	 
 		Route::get('/{id}', [PurchaseEntryController::class, 'show'])->name('purchases.show');
 		Route::delete('/{id}', [PurchaseEntryController::class, 'destroy'])->name('purchases.destroy');
 		

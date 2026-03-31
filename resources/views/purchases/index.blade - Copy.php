@@ -38,11 +38,6 @@
                     <td>{{ $invoice->total_items }}</td>
                     <td>{{ number_format($invoice->total_amount, 2) }}</td>
                     <td>
-                    	
-                        @if($invoice->status == 0)
-                            <a href="{{ route('invoice.update.page', $invoice->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        @endif
-                    
                         <a href="{{ route('purchases.show', $invoice->id) }}" class="btn btn-sm btn-primary">View</a>
 
                         <form action="{{ route('purchases.destroy', $invoice->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
