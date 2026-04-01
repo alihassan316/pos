@@ -15,6 +15,7 @@ class ProductsInvoice extends Model
     protected $fillable = [
         'shop_id',
         'category_id',
+		'sequnce',
         'name',
         'ingredient',
         'company',
@@ -44,8 +45,8 @@ class ProductsInvoice extends Model
         'purchase_invoice_id',
     ];
 
-    public function productsInvoice()
-	{
-		return $this->hasMany(\App\Models\ProductsInvoice::class);
-	}
+   // public function productsInvoice()
+	//{
+	//	return $this->hasMany(\App\Models\ProductsInvoice::class);
+	//}
 }

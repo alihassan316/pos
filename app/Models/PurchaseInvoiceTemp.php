@@ -10,6 +10,7 @@ class PurchaseInvoiceTemp extends Model
 
     protected $fillable = [
         'invoice_id',
+		'sequnce',
         'name',
         'ingrediant',
         'qty',

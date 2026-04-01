@@ -27,8 +27,9 @@ class PurchaseInvoice extends Model
    //     return $this->hasMany(Product::class, 'purchase_invoice_id');
     //}
 	public function productsInvoice()
-    {
-        return $this->hasMany(\App\Models\ProductsInvoice::class, 'purchase_invoice_id', 'id');
-    }
+	{
+		return $this->hasMany(\App\Models\ProductsInvoice::class, 'purchase_invoice_id', 'id')
+					->orderBy('sequnce', 'asc');
+	}
 	
 }

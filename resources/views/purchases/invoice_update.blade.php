@@ -44,6 +44,7 @@
     <table class="table table-bordered" id="productTable">
         <thead>
             <tr>
+            	<th>Order</th>
                 <th style="min-width:250px;">Name</th>
                 <th>Ingredient</th>
                 <th>Qty</th>
@@ -68,6 +69,7 @@
             {{-- Already Saved Rows --}}
             @foreach($products as $p)
                 <tr data-id="{{ $p->id }}">
+                	<td>{{ $p->sequnce }}</td>
                     <td>{{ $p->name }}</td>
                     <td>{{ $p->ingrediant }}</td>
                     <td>{{ $p->qty }}</td>
@@ -209,6 +211,7 @@ function addEditableRow() {
     let tr = document.createElement("tr");
 
     tr.innerHTML = `
+		<td><input type="text" class="form-control sequnce" /></td>
         <td><input type="text" class="form-control nameField" /></td>
         <td><input type="text" class="form-control ingredientField" /></td>
         <td><input type="text" class="form-control calc qtyField" /></td>
@@ -259,6 +262,7 @@ function addEditableRow() {
 // Save row
 function saveRow(tr) {
     let data = {
+		sequnce: tr.querySelector(".sequnce").value,
         name: tr.querySelector(".nameField").value,
         ingrediant: tr.querySelector(".ingredientField").value,
         qty: tr.querySelector(".qtyField").value,
@@ -303,6 +307,7 @@ function convertToStaticRow(tr, row) {
 
     tr.dataset.id = row.id; // store ID for delete
     tr.innerHTML = `
+		<td>${v(row.sequnce)}</td>
         <td>${v(row.name)}</td>
         <td>${v(row.ingrediant)}</td>
         <td>${v(row.qty)}</td>

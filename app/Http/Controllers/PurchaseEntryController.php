@@ -21,6 +21,7 @@ class PurchaseEntryController extends Controller
 	public function show($id)
 	{
 		$invoice = PurchaseInvoice::with('productsInvoice')->findOrFail($id);
+		
 		return view('purchases.show', compact('invoice'));
 	}
 	
@@ -50,14 +51,12 @@ class PurchaseEntryController extends Controller
 		$invoice_number = $request->invoice_number;
 		$invoice_date = $request->invoice_date;	
 		$notes = $request->notes;
-		
 		$inv = new PurchaseInvoice();
 		$inv->company_name = $name;
 		$inv->contact = $contact;
 		$inv->invoice_number = $invoice_number;
 		$inv->invoice_date = $invoice_date;
 		$inv->notes = $notes;
-		
 		$inv->save();
 		
 		return redirect()->route('invoice.update.page', $inv->id);
@@ -90,6 +89,7 @@ class PurchaseEntryController extends Controller
         $productsData = [];
 
         foreach ($tempProducts as $p) {
+			
             $qty = floatval($p->qty);
             $bonus = floatval($p->bonus);
             $perPack = floatval($p->perpack) ?: 1;
@@ -113,9 +113,9 @@ class PurchaseEntryController extends Controller
             $gstFlatAmount += $gstFlat;
             $totalItems++;
 			
-			
 			$mainProduct = \App\Models\Product::firstOrNew(['name' => $p->name]);
 			$mainProduct->shop_id = 1;
+			//$mainProduct->sequence = $p->sequence;
 			$mainProduct->category_id = $p->category_id ?? null;
 			$mainProduct->ingredient = $p->ingrediant ?? null;
 			$mainProduct->company = $p->company ?? null;
@@ -129,8 +129,10 @@ class PurchaseEntryController extends Controller
 			$mainProduct->status = 1;
 			$mainProduct->save();
 			
+			
             $productsData[] = [
-                'name' => $p->name,
+                'sequnce' => $p->sequnce,
+				'name' => $p->name,
                 'ingredient' => $p->ingrediant,
                 'category_id' => $p->category_id ?? null,
                 'company' => $p->company ?? null,
@@ -175,7 +177,8 @@ class PurchaseEntryController extends Controller
 
     } catch (\Exception $e) {
         DB::rollBack();
-		
+		echo $e->getMessage();
+		die("");
         return redirect()->back()->with('error', 'Error saving invoice: ' . $e->getMessage());
     }
 }
@@ -204,6 +207,7 @@ class PurchaseEntryController extends Controller
 	{
 		$row = PurchaseInvoiceTemp::create([
 			'invoice_id'    => $invoiceId,
+			'sequnce'      => $request->sequnce,
 			'name'          => $request->name,
 			'ingrediant'    => $request->ingrediant,
 			'qty'           => $request->qty,
@@ -233,8 +237,7 @@ class PurchaseEntryController extends Controller
 	{
 		$invoice = PurchaseInvoice::findOrFail($id);
 	
-		// (Later you will load saved rows here)
-		$products = PurchaseInvoiceTemp::where('invoice_id', $id)->get();
+		$products = PurchaseInvoiceTemp::where('invoice_id', $id)->orderBy('sequnce', 'asc')->get();
 	
 		return view('purchases.invoice_update', compact('invoice', 'products'));
 	}
@@ -425,6 +428,7 @@ public function saveProductsInvoice($productsData, $invoiceId)
 		$pinv->qty = $qty;
 		$pinv->bonus = $bonus;
         $pinv->category_id = $p['category_id'] ?? null;
+		$pinv->sequnce = $p['sequnce'];
         $pinv->name = $p['name'];
         $pinv->ingredient = $p['ingredient'] ?? null;
         $pinv->company = $p['company'] ?? null;
