@@ -209,9 +209,11 @@ document.querySelectorAll(".expiryField").forEach(input => attachExpiryHandler(i
 
 function addEditableRow() {
     let tr = document.createElement("tr");
+	
+	let nextSeq = document.querySelectorAll("#rows tr").length + 1;
 
     tr.innerHTML = `
-		<td><input type="text" class="form-control sequnce" /></td>
+		<td><input type="text" class="form-control sequnce" value="${nextSeq}" /></td>
         <td><input type="text" class="form-control nameField" /></td>
         <td><input type="text" class="form-control ingredientField" /></td>
         <td><input type="text" class="form-control calc qtyField" /></td>

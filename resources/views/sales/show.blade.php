@@ -132,8 +132,8 @@
                             <tr>
                                 <td>{{ $item->product_name }}{{ $item->custom_name ? ' *' : '' }}</td>
                                 <td class="td-qty">{{ $item->quantity }}</td>
-                                <td class="td-price">{{ number_format($item->unit_price, 0) }}</td>
-                                <td class="td-total">{{ number_format($item->total_price, 0) }}</td>
+                                <td class="td-price">{{ number_format($item->unit_price, 2) }}</td>
+                                <td class="td-total">{{ number_format($item->total_price, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -141,22 +141,22 @@
 
                     <div class="r-solid"></div>
                     <div class="total-items"><span>Total Items:</span><span>{{ $sale->items->count() }}</span></div>
-                    <div class="summary-row"><span>Subtotal:</span><span>{{ number_format($sale->subtotal, 0) }}</span></div>
+                    <div class="summary-row"><span>Subtotal:</span><span>{{ number_format($sale->subtotal, 2) }}</span></div>
                     @if($sale->misc_amount <= 0)
                         {{-- Add negative misc to discount --}}
-                        <div class="summary-row"><span>Discount:</span><span>{{ number_format($sale->discount_amount + abs($sale->misc_amount), 0) }}</span></div>
+                        <div class="summary-row"><span>Discount:</span><span>{{ number_format($sale->discount_amount + abs($sale->misc_amount), 2) }}</span></div>
                     @elseif($sale->misc_amount > 0)
                         {{-- Positive misc shown separately --}}
-                        <div class="summary-row"><span>Dispatch/Misc Charges:</span><span>{{ number_format($sale->misc_amount, 0) }}</span></div>
+                        <div class="summary-row"><span>Dispatch/Misc Charges:</span><span>{{ number_format($sale->misc_amount, 2) }}</span></div>
                     @endif
                     @if($sale->refund_amount > 0)
-                    <div class="summary-row r-bold"><span>Refunded:</span><span>{{ number_format($sale->refund_amount, 0) }}</span></div>
+                    <div class="summary-row r-bold"><span>Refunded:</span><span>{{ number_format($sale->refund_amount, 2) }}</span></div>
                     @endif
                     <div class="r-solid"></div>
                     <div class="summary-row total"><span>TOTAL:</span>
                     	
                         <span>
-                            {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 0) }}
+                            {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 2) }}
                         </span>
                         
                     </div>
@@ -259,8 +259,8 @@
                             </td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ $item->returned_qty > 0 ? $item->returned_qty : '—' }}</td>
-                            <td>{{ number_format($item->unit_price, 0) }} Rs</td>
-                            <td>{{ number_format($item->total_price, 0) }} Rs</td>
+                            <td>{{ number_format($item->unit_price, 2) }} Rs</td>
+                            <td>{{ number_format($item->total_price, 2) }} Rs</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -281,14 +281,14 @@
         {{-- Subtotal --}}
         <div class="d-flex justify-content-between py-2 border-bottom">
             <span class="text-muted">Subtotal</span>
-            <span>{{ number_format($sale->subtotal, 0) }} Rs</span>
+            <span>{{ number_format($sale->subtotal, 2) }} Rs</span>
         </div>
 
         {{-- Discount (include negative misc if any) --}}
         <div class="d-flex justify-content-between py-2 border-bottom">
             <span class="text-muted">Discount</span>
             <span class="text-success fw-semibold">
-                {{ number_format($sale->discount_amount + ($sale->misc_amount < 0 ? abs($sale->misc_amount) : 0), 0) }} Rs
+                {{ number_format($sale->discount_amount + ($sale->misc_amount < 0 ? abs($sale->misc_amount) : 0), 2) }} Rs
             </span>
         </div>
 
@@ -296,7 +296,7 @@
         @if($sale->misc_amount > 0)
         <div class="d-flex justify-content-between py-2 border-bottom">
             <span class="text-muted">Dispatch / Misc Charges</span>
-            <span class="fw-semibold">{{ number_format($sale->misc_amount, 0) }} Rs</span>
+            <span class="fw-semibold">{{ number_format($sale->misc_amount, 2) }} Rs</span>
         </div>
         @endif
 
@@ -304,7 +304,7 @@
         @if($sale->refund_amount > 0)
         <div class="d-flex justify-content-between py-2 border-bottom">
             <span class="text-muted">Refunded</span>
-            <span class="fw-bold text-info">{{ number_format($sale->refund_amount, 0) }} Rs</span>
+            <span class="fw-bold text-info">{{ number_format($sale->refund_amount, 2) }} Rs</span>
         </div>
         @endif
 
@@ -312,7 +312,7 @@
         <div class="d-flex justify-content-between py-2">
             <span class="fw-bold">Total</span>
             <span class="fw-bold">
-                {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 0) }} Rs
+                {{ number_format($sale->subtotal - $sale->refund_amount - $sale->discount_amount + $sale->misc_amount, 2) }} Rs
             </span>
         </div>
     </div>
