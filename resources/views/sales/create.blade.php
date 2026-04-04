@@ -4,24 +4,42 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
+
+
 <style>
     .ts-wrapper { width: 100%; }
     .ts-control { min-height: 32px !important; padding: 3px 8px !important; font-size: 13px !important; border-radius: 6px !important; }
     .ts-dropdown { font-size: 13px; z-index: 9999 !important; }
     .ts-dropdown .option { padding: 7px 12px; }
+
+    /* --- ADDED FOR BETTER VISIBILITY --- */
+    /* This targets the item selected via keyboard arrows or mouse hover */
+    .ts-dropdown .option.active {
+        background-color: #0d6efd !important; /* Bootstrap Primary Blue */
+        color: #fff !important;
+    }
+    
+    /* Ensures the small stock text also turns white when the row is active */
+    .ts-dropdown .option.active small {
+        color: #fff !important;
+    }
+    /* ------------------------------------ */
+
     .manual-entry-row .product-manual-input { font-size: 13px; }
     .manual-badge { font-size: 10px; vertical-align: middle; }
-	
-	.form-control, .form-select{
-		padding:2px !important;
-	}
-	.sidebar{
-		display:none !important;
-	}
-	.main-wrapper{
-		margin-left:0px !important;
-	}
+    
+    .form-control, .form-select {
+        padding: 2px !important;
+    }
+    .sidebar {
+        display: none !important;
+    }
+    .main-wrapper {
+        margin-left: 0px !important;
+    }
 </style>
+
 @endpush
 
 @section('content')
@@ -377,8 +395,72 @@
         var due = total - paid;
         document.getElementById("dueAmount").textContent = "Rs " + (due < 0 ? 0 : due).toLocaleString();
     }
+	
+	function initTomSelect(selectEl) {
+    return new TomSelect(selectEl, {
+        valueField: "value",
+        labelField: "text",
+        searchField: ["text", "sku", "barcode"],
+        placeholder: "Search product...",
+        loadThrottle: 300,
+        create: true, // Allow creating manual entries
+        createOnBlur: false,
+        createFilter: function(input) {
+            input = input.toLowerCase();
+            // Only show "Create" if the input doesn't exactly match a name in our cache
+            return !Object.values(cache).some(p => p.text.toLowerCase() === input);
+        },
+        // IMPORTANT: This ensures the dropdown stays open and shows results from API
+        firstUrl: null, 
+        shouldLoad: function(query) {
+            return query.length >= 1;
+        },
+        load: function(query, callback) {
+            fetch(searchUrl + "?q=" + encodeURIComponent(query))
+                .then(r => r.json())
+                .then(data => {
+                    // Update our global cache so onChange knows the details
+                    data.forEach(p => { cache[p.value] = p; });
+                    callback(data);
+                })
+                .catch(() => callback());
+        },
+        render: {
+            option_create: function(data, escape) {
+                return `<div class="create" style="padding:8px 12px; background: #fff3cd; color: #856404; font-weight: bold;">
+                            <i class="bi bi-pencil-square me-1"></i> Enter "${escape(data.input)}" manually (Tab/Enter)
+                        </div>`;
+            },
+            option: function(data) {
+                return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                            <span>${data.text}${data.sku ? " ("+data.sku+")" : ""}</span>
+                            <small style="color:${stockColor(data.stock)};font-size:11px;font-weight:600;white-space:nowrap;">Stock: ${data.stock}</small>
+                        </div>`;
+            }
+        },
+        onChange: function(value) {
+            if (!value) return;
 
-    function initTomSelect(selectEl) {
+            var row = selectEl.closest("tr");
+            var product = cache[value];
+
+            if (product) {
+                // IT IS A REAL PRODUCT
+                row.querySelector(".unit-price").value = parseFloat(product.price).toFixed(2);
+                updateStockBadge(row.querySelector(".stock-badge"), product.stock);
+                row.querySelector(".buy-price").textContent = "Rs " + parseFloat(product.buy_price || 0).toLocaleString();
+                row.querySelector(".discount").value = parseFloat(product.discount || 0).toFixed(2);
+                calculateRow(row);
+            } else {
+                // IT IS A MANUAL ENTRY
+                // In TomSelect, 'value' will be the text the user typed if it was 'created'
+                switchToManual(row, value);
+            }
+        }
+    });
+}
+
+    function initTomSelect_old(selectEl) {
         return new TomSelect(selectEl, {
             valueField: "value",
             labelField: "text",

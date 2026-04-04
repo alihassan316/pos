@@ -29,6 +29,9 @@
         border: none;
         background: none;
     }
+	#productTable tr{
+		border:solid;
+	}
 </style>
 
 <div>

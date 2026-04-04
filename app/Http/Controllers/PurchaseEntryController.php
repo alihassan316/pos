@@ -25,6 +25,8 @@ class PurchaseEntryController extends Controller
 		return view('purchases.show', compact('invoice'));
 	}
 	
+	
+	
 	public function destroy($id)
 	{
 		$invoice = PurchaseInvoice::findOrFail($id);
@@ -37,6 +39,23 @@ class PurchaseEntryController extends Controller
 	
 		return redirect()->route('purchases.index')
 						 ->with('success', 'Purchase Invoice deleted successfully.');
+	}
+	
+	public function invoiceEdit($id){
+		$invoice = PurchaseInvoice::findOrFail($id);
+		return view('purchases.edit', compact('invoice'));
+	}
+	
+	public function update_inv(Request $request, $id)
+	{
+		$inv = PurchaseInvoice::findOrFail($id);
+		$inv->company_name = $request->company_name;
+		$inv->contact = $request->contact;
+		$inv->invoice_number = $request->invoice_number;
+		$inv->invoice_date = $request->invoice_date;
+		$inv->notes = $request->notes;
+		$inv->save();
+		return redirect()->route('purchases.index')->with('success', 'Invoice updated successfully');
 	}
 	
     public function create()

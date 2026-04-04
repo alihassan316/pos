@@ -56,6 +56,10 @@ Route::middleware(['auth'])->group(function () {
 		Route::get('/invoice-update/{id}', [PurchaseEntryController::class, 'invoiceUpdate'])
      ->name('invoice.update.page');
 	 
+	 Route::get('/invoice-edit/{id}', [PurchaseEntryController::class, 'invoiceEdit'])
+     ->name('invoice.edit.page');
+	 Route::post('/purchases/update/{id}', [PurchaseEntryController::class, 'update_inv'])->name('purchases.update');
+	 
 	 	Route::post('/invoice/{id}/add-row', [PurchaseEntryController::class, 'addTempRow'])
     ->name('invoice.add.row');
 		

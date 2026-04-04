@@ -38,9 +38,11 @@
                     <td>{{ $invoice->total_items }}</td>
                     <td>{{ number_format($invoice->total_amount, 2) }}</td>
                     <td>
+                    
+                    	<a href="{{ route('invoice.edit.page', $invoice->id) }}" class="btn btn-sm btn-info">Edit</a>
                     	
                         @if($invoice->status == 0)
-                            <a href="{{ route('invoice.update.page', $invoice->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{{ route('invoice.update.page', $invoice->id) }}" class="btn btn-sm btn-warning">Add Products</a>
                         @endif
                     
                         <a href="{{ route('purchases.show', $invoice->id) }}" class="btn btn-sm btn-primary">View</a>
