@@ -66,6 +66,11 @@ class PurchaseEntryController extends Controller
 	
 	public function submitivnoice(Request $request)
 {
+	
+	
+	ini_set('max_execution_time', 600); 
+    ini_set('memory_limit', '1024M');
+	
     $invoice = PurchaseInvoice::findOrFail($request->id);
 
     // Get all temp products for this invoice
@@ -180,6 +185,155 @@ class PurchaseEntryController extends Controller
 		echo $e->getMessage();
 		die("");
         return redirect()->back()->with('error', 'Error saving invoice: ' . $e->getMessage());
+    }
+}
+
+
+public function submitivnoice_optimized(Request $request)
+{
+    $invoice = PurchaseInvoice::findOrFail($request->id);
+
+    $tempProducts = PurchaseInvoiceTemp::where('invoice_id', $invoice->id)->get();
+
+    if ($tempProducts->isEmpty()) {
+        return back()->with('error', 'No products to submit.');
+    }
+
+    DB::beginTransaction();
+    try {
+        $totalItems = 0;
+        $grossAmount = 0;
+        $discountPercentAmount = 0;
+        $discountFlatAmount = 0;
+        $gstPercentAmount = 0;
+        $gstFlatAmount = 0;
+        $totalFinal = 0;
+
+        // -----------------------------------------
+        // FETCH ALL PRODUCTS BY NAME ONCE
+        // -----------------------------------------
+        $productNames = $tempProducts->pluck('name')->unique()->toArray();
+
+        $existingProducts = \App\Models\Product::whereIn('name', $productNames)
+            ->get()
+            ->keyBy('name'); // for O(1) lookup
+
+
+        $finalProductsInsert = [];
+
+        foreach ($tempProducts as $p) {
+
+            $qty = floatval($p->qty);
+            $bonus = floatval($p->bonus);
+            $perPack = floatval($p->perpack) ?: 1;
+            $packPrice = floatval($p->packprice);
+
+            $discountPercent = floatval($p->discount_per);
+            $discountFlat = floatval($p->discount_fix);
+            $gstPercent = floatval($p->gst_per);
+            $gstFlat = floatval($p->gst_fix);
+
+            $baseAmount = $qty * $packPrice;
+
+            $discountAmount = ($baseAmount * $discountPercent / 100) + $discountFlat;
+            $gstAmount = (($baseAmount - $discountAmount) * $gstPercent / 100) + $gstFlat;
+
+            $grossAmount += $baseAmount;
+            $discountPercentAmount += ($baseAmount * $discountPercent / 100);
+            $discountFlatAmount += $discountFlat;
+            $gstPercentAmount += (($baseAmount - ($baseAmount * $discountPercent / 100) - $discountFlat) * $gstPercent / 100);
+            $gstFlatAmount += $gstFlat;
+
+            $totalFinal += floatval($p->final_price);
+            $totalItems++;
+
+            // -----------------------------------------
+            // PRODUCT CREATE / UPDATE OPTIMIZED
+            // -----------------------------------------
+            if ($existingProducts->has($p->name)) {
+                $mainProduct = $existingProducts[$p->name];
+            } else {
+                $mainProduct = new \App\Models\Product();
+                $mainProduct->name = $p->name;
+                $existingProducts[$p->name] = $mainProduct;
+            }
+
+            // Update stock only once per product row
+            $mainProduct->shop_id = 1;
+            $mainProduct->category_id = $p->category_id;
+            $mainProduct->ingredient = $p->ingrediant;
+            $mainProduct->company = $p->company;
+            $mainProduct->batch_no = $p->batch;
+            $mainProduct->unit_sell_price = floatval($p->sale_price ?? 0);
+            $mainProduct->sell_price = floatval($p->sale_price ?? 0) * $perPack;
+            $mainProduct->buy_price = floatval($p->buy_price ?? 0);
+            $mainProduct->current_stock = ($mainProduct->current_stock ?? 0) + ($qty * $perPack);
+            $mainProduct->is_box = $perPack > 1 ? 1 : 0;
+            $mainProduct->items_per_box = $perPack;
+            $mainProduct->status = 1;
+
+            $mainProduct->save();
+
+            // -----------------------------------------
+            // PREPARE BULK INSERT
+            // -----------------------------------------
+            $finalProductsInsert[] = [
+                'purchase_invoice_id' => $invoice->id,
+                'sequnce' => $p->sequnce,
+                'name' => $p->name,
+                'ingredient' => $p->ingrediant,
+                'category_id' => $p->category_id,
+                'company' => $p->company,
+                'batch_no' => $p->batch,
+                'qty' => $qty,
+                'bonus' => $bonus,
+                'per_pack' => $perPack,
+                'pack_price' => $packPrice,
+                'discount_percent' => $discountPercent,
+                'discount_flat' => $discountFlat,
+                'gst_percent' => $gstPercent,
+                'gst_flat' => $gstFlat,
+                'final_price' => $p->final_price,
+                'sale_price' => $p->sale_price,
+                'expiry' => $p->expiry,
+                'expiry_alert' => $p->expiry_alert,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // -----------------------------------------
+        // BULK INSERT FINAL INVOICE PRODUCTS (1 query)
+        // -----------------------------------------
+        ProductsInvoice::insert($finalProductsInsert);
+
+        // -----------------------------------------
+        // DELETE TEMP PRODUCTS (1 query)
+        // -----------------------------------------
+        PurchaseInvoiceTemp::where('invoice_id', $invoice->id)->delete();
+
+        // -----------------------------------------
+        // UPDATE INVOICE
+        // -----------------------------------------
+        $invoice->update([
+            'total_items' => $totalItems,
+            'gross_amount' => $grossAmount,
+            'discount_percent_amount' => $discountPercentAmount,
+            'discount_flat_amount' => $discountFlatAmount,
+            'gst_percent_amount' => $gstPercentAmount,
+            'gst_flat_amount' => $gstFlatAmount,
+            'total_amount' => $totalFinal,
+            'status' => 1,
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('purchases.index')
+            ->with('success', 'Purchase Invoice saved successfully.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Error saving invoice: ' . $e->getMessage());
     }
 }
 	

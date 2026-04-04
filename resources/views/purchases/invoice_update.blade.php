@@ -130,6 +130,7 @@ addEditableRow();
 
 // Update totals
 function updateSummary() {
+	
     let rows = document.querySelectorAll("#rows tr");
     let totalItems = 0;
     let totalCost = 0;
@@ -137,7 +138,7 @@ function updateSummary() {
     rows.forEach(tr => {
         // Skip empty editable rows (no name)
         let nameInput = tr.querySelector(".nameField");
-        let nameText = tr.cells[0]?.innerText || "";
+        let nameText = tr.cells[1]?.innerText || "";
 
         if ((nameInput && nameInput.value.trim() === "") || (!nameInput && nameText.trim() === "")) {
             return;
@@ -146,10 +147,12 @@ function updateSummary() {
         totalItems++;
 
         let finalInput = tr.querySelector(".finalField");
-        let finalText = tr.cells[13]; // static final price column
+        let finalText = tr.cells[14]; // static final price column
         let val = 0;
         if(finalInput) val = parseFloat(finalInput.value) || 0;
         else if(finalText) val = parseFloat(finalText.innerText) || 0;
+		
+		
         totalCost += val;
     });
 
