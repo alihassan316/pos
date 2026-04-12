@@ -63,6 +63,7 @@ class ProductController extends Controller
 			return [
 				'value'   => (string) $p->id,
 				'text'  => $p->name . ($p->company ? ' (' . $p->company . ')' : ''),
+				//'company' => $p->company,
 				'sku'     => $p->sku,       // include sku
 				'barcode' => $p->barcode,   // include barcode
 				'price'   => $price,

@@ -13,6 +13,7 @@ class PurchaseInvoiceTemp extends Model
 		'sequnce',
         'name',
         'ingrediant',
+		'company',
         'qty',
         'bonus',
         'perpack',

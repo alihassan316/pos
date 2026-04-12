@@ -38,6 +38,9 @@
     .main-wrapper {
         margin-left: 0px !important;
     }
+	.no-padding{
+		padding:0px !important;
+	}
 </style>
 
 @endpush
@@ -70,12 +73,12 @@
                         <tr>
                             <th style="width:28%">Product</th>
                             <th style="width:12%">Buy Price</th>
-                            <th style="width:10%">Stock</th>
+                            <th style="width:8%">Stock</th>
                             <th style="width:13%">Qty</th>
-                            <th style="width:14%">Unit Price</th>
-                            <th style="width:14%">Discount</th>
-                            <th style="width:14%">Total</th>
-                            <th style="width:7%"></th>
+                            <th style="width:10%">Unit Price</th>
+                            <th style="width:10%">Discount</th>
+                            <th style="width:10%">Total</th>
+                            <th style="width:16%; padding:0px;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -95,7 +98,12 @@
                             </td>
 
                             <td class="fw-semibold row-total align-middle">Rs 0</td>
-                            <td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="bi bi-trash"></i></button></td>
+                            <td class="no-padding">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-primary add-row-inline">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -545,8 +553,8 @@
         var i = rowIndex;
         tr.innerHTML =
             `<td><select name="products[${i}][product_id]" class="product-select"></select></td>
-            <td><span class="badge bg-secondary stock-badge">0</span></td>
 			<td class="buy-price">Rs 0</td>
+			<td><span class="badge bg-secondary stock-badge">0</span></td>
             <td><input  name="products[${i}][quantity]" class="form-control form-control-sm quantity" ></td>
             <td><input name="products[${i}][unit_price]" class="form-control form-control-sm unit-price"  value=""></td>
 			<td><input name="products[${i}][discount]" class="form-control form-control-sm discount"  value="">
@@ -555,7 +563,9 @@
     <input type="hidden" name="products[${i}][item_discount_type]" class="item-discount-type" value="percent">
 			</td>
             <td class="fw-semibold row-total align-middle">Rs 0</td>
-            <td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="bi bi-trash"></i></button></td>`;
+            <td class="no-padding"><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="bi bi-trash"></i></button><button type="button" class="btn btn-sm btn-outline-primary add-row-inline">
+        <i class="bi bi-plus-lg"></i>
+    </button></td>`;
         tbody.appendChild(tr);
         initTomSelect(tr.querySelector(".product-select")).load("");
         rowIndex++;
@@ -693,10 +703,8 @@ document.addEventListener("keydown", function(e) {
 */
 
 document.addEventListener('keydown', function(e) {
-			// Ignore if focus is in input, textarea, or contenteditable
-			const target = e.target;
-			if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) return;
-		
+	
+	
 			// Ctrl + Z → click Add Item button
 			if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z') {
 				e.preventDefault();
@@ -704,7 +712,9 @@ document.addEventListener('keydown', function(e) {
 				if (addBtn) addBtn.click();
 			}
 			
-			
+			// Ignore if focus is in input, textarea, or contenteditable
+			const target = e.target;
+			if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) return;
 		
 		});
 		
@@ -716,6 +726,58 @@ document.getElementById("saleForm").addEventListener("keydown", function(e) {
     }
 });
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const alertBox = document.querySelector('.alert');
+
+    if (alertBox) {
+        setTimeout(() => {
+            alertBox.style.transition = "opacity 0.5s ease";
+            alertBox.style.opacity = "0";
+
+            setTimeout(() => alertBox.remove(), 500);
+        }, 5000); // 5 seconds
+    }
+});
+
+document.getElementById("invoiceTable").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        const target = e.target;
+
+        // Only trigger inside inputs
+        if (!target.classList.contains("quantity") &&
+            !target.classList.contains("unit-price") &&
+            !target.classList.contains("discount")) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const row = target.closest("tr");
+
+        // Only trigger when cursor is in LAST column (discount field)
+        if (target.classList.contains("discount")) {
+            document.getElementById("addRow").click();
+
+            // focus next row first input
+            setTimeout(() => {
+                const rows = document.querySelectorAll("#invoiceTable tbody tr");
+                const lastRow = rows[rows.length - 1];
+                const firstInput = lastRow.querySelector(".product-select");
+
+                if (firstInput && firstInput.tomselect) {
+                    firstInput.tomselect.focus();
+                }
+            }, 100);
+        }
+    }
+});
+
+document.getElementById("invoiceTable").addEventListener("click", function(e) {
+    if (e.target.closest(".add-row-inline")) {
+        document.getElementById("addRow").click();
+    }
+});
 
 </script>
 @endpush

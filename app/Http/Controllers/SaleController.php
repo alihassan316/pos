@@ -161,6 +161,10 @@ class SaleController extends Controller
 				}
             }
         });
+		
+		if ($request->input('print') == 0) {
+			return back()->with('success', 'Sale completed successfully.');
+		}
 
         return redirect()->route('sales.show', $sale)
             ->with('success', 'Sale completed successfully.')

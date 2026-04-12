@@ -36,6 +36,40 @@
             <div class="stat-sub">&nbsp;</div>
         </div>
     </div>
+    
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#6366f1,#4338ca);">
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
+            <div class="stat-value">{{ $totalProducts }}</div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-sub">&nbsp;</div>
+        </div>
+    </div>
+    
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#f59e0b,#d97706);">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-value">{{ $lowStockCount }}</div>
+            <div class="stat-label">Low Stock (&lt; 10)</div>
+            <div class="stat-sub">&nbsp;</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#ef4444,#b91c1c);">
+            <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+            <div class="stat-value">{{ $outOfStockCount }}</div>
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-sub">&nbsp;</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card" style="background: linear-gradient(135deg,#14b8a6,#0d9488);">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-value">{{ number_format($totalInventoryAmount, 2) }} Rs</div>
+            <div class="stat-label">Total Inventory Value</div>
+            <div class="stat-sub">&nbsp;</div>
+        </div>
+    </div>
 
 </div>
 

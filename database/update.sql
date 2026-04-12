@@ -1,0 +1,1 @@
+ALTER TABLE `purchase_invoices_temp` ADD `company` VARCHAR(111) NULL AFTER `ingrediant`;

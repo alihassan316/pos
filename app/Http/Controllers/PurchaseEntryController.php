@@ -383,6 +383,7 @@ public function submitivnoice_optimized(Request $request)
 			'sequnce'      => $request->sequnce,
 			'name'          => $request->name,
 			'ingrediant'    => $request->ingrediant,
+			'company'    	=> $request->company,
 			'qty'           => $request->qty,
 			'bonus'         => $request->bonus,
 			'perpack'       => $request->perpack,

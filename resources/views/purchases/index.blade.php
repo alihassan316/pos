@@ -21,7 +21,7 @@
             <tr>
                 <th>#</th>
                 <th>Invoice Number</th>
-                <th>Company</th>
+                <th>Brooker</th>
                 <th>Date</th>
                 <th>Total Items</th>
                 <th>Total Amount</th>

@@ -48,8 +48,9 @@
         <thead>
             <tr>
             	<th>Order</th>
-                <th style="min-width:250px;">Name</th>
+                <th style="min-width:200px;">Name</th>
                 <th>Ingredient</th>
+                <th>Company</th>
                 <th>Qty</th>
                 <th>Bonus</th>
                 <th>Per Pack</th>
@@ -75,6 +76,7 @@
                 	<td>{{ $p->sequnce }}</td>
                     <td>{{ $p->name }}</td>
                     <td>{{ $p->ingrediant }}</td>
+                    <td>{{ $p->company }}</td>
                     <td>{{ $p->qty }}</td>
                     <td>{{ $p->bonus }}</td>
                     <td>{{ $p->perpack }}</td>
@@ -220,8 +222,9 @@ function addEditableRow() {
 
     tr.innerHTML = `
 		<td><input type="text" class="form-control sequnce" value="${nextSeq}" /></td>
-        <td><input type="text" class="form-control nameField" /></td>
-        <td><input type="text" class="form-control ingredientField" /></td>
+        <td><input type="text" data-field="prname" name="prname[]" class="form-control nameField"  autocomplete="on" /></td>
+        <td><input type="text" data-field="ingrediant" name="ingrediant[]" class="form-control ingredientField"  autocomplete="on" /></td>
+		<td><input type="text" data-field="company" name="company[]" class="form-control companyField"  autocomplete="on" /></td>
         <td><input type="text" class="form-control calc qtyField" /></td>
         <td><input type="text" class="form-control calc bonusField" /></td>
         <td><input type="text" class="form-control calc perPackField" /></td>
@@ -273,6 +276,7 @@ function saveRow(tr) {
 		sequnce: tr.querySelector(".sequnce").value,
         name: tr.querySelector(".nameField").value,
         ingrediant: tr.querySelector(".ingredientField").value,
+		company: tr.querySelector(".companyField").value,
         qty: tr.querySelector(".qtyField").value,
         bonus: tr.querySelector(".bonusField").value,
         perpack: tr.querySelector(".perPackField").value,
@@ -318,6 +322,7 @@ function convertToStaticRow(tr, row) {
 		<td>${v(row.sequnce)}</td>
         <td>${v(row.name)}</td>
         <td>${v(row.ingrediant)}</td>
+		<td>${v(row.company)}</td>
         <td>${v(row.qty)}</td>
         <td>${v(row.bonus)}</td>
         <td>${v(row.perpack)}</td>

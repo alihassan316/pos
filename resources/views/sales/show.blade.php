@@ -22,7 +22,7 @@
         line-height: 1.5;
     }
 	#thermal-receipt table td{
-		font-size:20px;
+		font-size:18px;
 	}
 	.adress{
 		font-size:18px;
@@ -52,7 +52,7 @@
 #thermal-receipt table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 15px;
+    font-size: 14px;
 }
 .adress{
 	font-size:15px;
@@ -61,9 +61,9 @@
     padding: 3px 0;
     vertical-align: top;
 }
-#thermal-receipt table .td-qty   { width: 30px; }
+#thermal-receipt table .td-qty   { width: 20px; }
 #thermal-receipt table .td-price { width: 60px; text-align: right; }
-#thermal-receipt table .td-total { width: 60px; text-align: right; }
+#thermal-receipt table .td-total { width: 80px; text-align: right; }
 #thermal-receipt .summary-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 18px; }
 #thermal-receipt .summary-row.total { font-weight: bold; font-size: 18px; }
 #thermal-receipt .r-center-footer { font-size: 18px; margin-top: 6px; }
@@ -122,9 +122,9 @@
                         <thead>
                             <tr>
                                 <td class="r-bold">Item</td>
-                                <td class="td-qty r-bold">Qty</td>
-                                <td class="td-price r-bold">Price</td>
-                                <td class="td-total r-bold">Total</td>
+                                <td class="td-qty r-bold">Q</td>
+                                <td class="td-price r-bold1">P</td>
+                                <td class="td-total r-bold1">Total</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -132,8 +132,8 @@
                             <tr>
                                 <td>{{ $item->product_name }}{{ $item->custom_name ? ' *' : '' }}</td>
                                 <td class="td-qty">{{ $item->quantity }}</td>
-                                <td class="td-price">{{ number_format($item->unit_price, 2) }}</td>
-                                <td class="td-total">{{ number_format($item->total_price, 2) }}</td>
+                                <td class="td-price">{{ number_format($item->unit_price, 1) }}</td>
+                                <td class="td-total">{{ number_format($item->total_price, 1) }}</td>
                             </tr>
                             @endforeach
                         </tbody>

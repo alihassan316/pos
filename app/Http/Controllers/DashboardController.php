@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use Illuminate\Http\Request;
+use DB;
 
 class DashboardController extends Controller
 {
@@ -60,6 +61,10 @@ class DashboardController extends Controller
 
     /** RECENT */
     $recentSales = Sale::latest()->take(8)->get();
+	
+	
+	$outOfStockCount = Product::where('current_stock', '<=', 0)->count();
+	$totalInventoryAmount = Product::sum(DB::raw('current_stock * unit_sell_price'));
 
     return view('dashboard', compact(
         'todaySales', 'todayCount',
@@ -68,7 +73,8 @@ class DashboardController extends Controller
         'totalProducts', 'lowStockCount', 'lowStockProducts',
         'expiryProducts',
         'totalDue', 'pendingCount',
-        'recentSales', 'refundCount'
+        'recentSales', 'refundCount',
+		'outOfStockCount', 'totalInventoryAmount'
     ));
 }
 

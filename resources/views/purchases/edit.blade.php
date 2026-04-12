@@ -29,7 +29,7 @@
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Company Name</label>
+                    <label class="form-label">Brooker Name</label>
                     <input type="text" name="company_name" class="form-control" value="{{ $invoice->company_name }}" required>
                 </div>
                 <div class="col-md-4">
