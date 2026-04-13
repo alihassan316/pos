@@ -152,7 +152,7 @@ function updateSummary() {
         totalItems++;
 
         let finalInput = tr.querySelector(".finalField");
-        let finalText = tr.cells[14]; // static final price column
+        let finalText = tr.cells[15]; // static final price column
         let val = 0;
         if(finalInput) val = parseFloat(finalInput.value) || 0;
         else if(finalText) val = parseFloat(finalText.innerText) || 0;
