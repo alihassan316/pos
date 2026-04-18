@@ -74,7 +74,8 @@
                             <th style="width:28%">Product</th>
                             <th style="width:12%">Buy Price</th>
                             <th style="width:8%">Stock</th>
-                            <th style="width:13%">Qty</th>
+                            <th style="width:12%">Company</th>
+                            <th style="width:7%">Qty</th>
                             <th style="width:10%">Unit Price</th>
                             <th style="width:10%">Discount</th>
                             <th style="width:10%">Total</th>
@@ -86,7 +87,9 @@
                             <td><select name="products[0][product_id]" class="product-select"></select></td>
                             <td class="buy-price">Rs 0</td>
                             <td><span class="badge bg-secondary stock-badge">0</span></td>
+                            <td><span class=" company-badge">-</span></td>
                             <td><input name="products[0][quantity]" class="form-control form-control-sm quantity"  value=""></td>
+                            
                             <td><input  name="products[0][unit_price]" class="form-control form-control-sm unit-price" value=""></td>
                             <td><input  name="products[0][discount]" class="form-control form-control-sm discount" value="">
                             
@@ -446,6 +449,7 @@ function initTomSelect(selectEl) {
                 updateStockBadge(row.querySelector(".stock-badge"), product.stock);
                 row.querySelector(".buy-price").textContent = "Rs " + parseFloat(product.buy_price || 0).toLocaleString();
                 row.querySelector(".discount").value = parseFloat(product.discount || 0).toFixed(2);
+				row.querySelector(".company-badge").textContent = product.company ?? '-';
                 calculateRow(row);
             } else {
                 // IT IS A MANUAL ENTRY
@@ -543,6 +547,7 @@ function initTomSelect(selectEl) {
             `<td><select name="products[${i}][product_id]" class="product-select"></select></td>
 			<td class="buy-price">Rs 0</td>
 			<td><span class="badge bg-secondary stock-badge">0</span></td>
+			<td><span class="company-badge">-</span></td>
             <td><input  name="products[${i}][quantity]" class="form-control form-control-sm quantity" ></td>
             <td><input name="products[${i}][unit_price]" class="form-control form-control-sm unit-price"  value=""></td>
 			<td><input name="products[${i}][discount]" class="form-control form-control-sm discount"  value="">
