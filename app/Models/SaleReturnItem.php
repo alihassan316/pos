@@ -10,7 +10,7 @@ class SaleReturnItem extends Model
         'sale_return_id',
         'sale_item_id',
         'product_id',
-        'qty',
+        'qty', 'purchase_price',
         'unit_price',
     ];
 

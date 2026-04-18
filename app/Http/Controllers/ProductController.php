@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\SaleItem;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,26 @@ class ProductController extends Controller
 		$products->appends(['search' => $request->search]); // Keep search in pagination links
 	
 		return view('products.index', compact('products'));
+	}
+	
+	public function history(Product $product)
+	{
+		// Fetch sale items of this product, with sale info
+		$saleItems = SaleItem::with('sale')->where('product_id', $product->id)->orderByDesc('id')->get();
+	
+		// Compute total profit
+		$totalProfit = 0;
+	
+		foreach ($saleItems as $item) {
+			$buy  = $item->purchase_price;
+			$sell = $item->unit_price;
+			$qty  = $item->quantity;
+			$profitPerItem = $sell - $buy;
+	
+			$totalProfit += ($profitPerItem * $qty);
+		}
+	
+		return view('products.history', compact('product', 'saleItems', 'totalProfit'));
 	}
 
     // Show create form
@@ -103,11 +124,11 @@ class ProductController extends Controller
 {
 	
 	
-	
 	$request->validate([
         'name' => 'required',
         'sell_price' => 'required|numeric',
-        'is_box' => 'required|boolean',
+		'sell_price' => 'required',
+       // 'is_box' => 'required|boolean',
         'items_per_box' => 'nullable|numeric',
     ]);
 	

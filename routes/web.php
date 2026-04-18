@@ -32,6 +32,9 @@ Route::middleware(['auth'])->group(function () {
     // Products (protected)
     Route::resource('products', ProductController::class);
 	
+	Route::get('products/{product}/history', [ProductController::class, 'history'])
+    ->name('products.history');
+	
 	Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
 
     // Sales (protected)

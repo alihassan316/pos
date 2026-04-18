@@ -96,6 +96,11 @@
                         <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-outline-primary me-1">
                             <i class="bi bi-pencil"></i>
                         </a>
+                        
+                        <a href="{{ route('products.history', $product) }}" class="btn btn-sm btn-outline-info me-1">
+                            <i class="bi bi-clock-history"></i>
+                        </a>
+                        
                         <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline"
                               onsubmit="return confirm('Delete this product?')">
                             @csrf

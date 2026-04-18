@@ -104,43 +104,35 @@ class SaleController extends Controller
 							? 'paid'
 							: (($paid > 0) ? 'partial' : 'pending'),
 			]);
-
-/*
-            $sale = Sale::create([
-                'invoice_number' => $invoiceNumber,
-                'total'          => $total,
-                'paid_amount'    => $request->paid_amount ?? 0,
-                'due_amount'     => $total - ($request->paid_amount ?? 0),
-                'status'         => ($request->paid_amount >= $total) ? 'paid'
-                                  : (($request->paid_amount > 0) ? 'partial' : 'pending'),
-            ]);
-*/
-
+			
+			
             foreach ($request->products as $item) {
+				
+				
+				
 				
 				if($item['quantity'] > 0 && $item['unit_price'] > 0){
 				
                 $productId  = !empty($item['product_id']) && $item['product_id'] != '0'
                               ? $item['product_id'] : null;
                 $customName = $productId ? null : ($item['custom_name'] ?? 'Custom Item');
-
-/*
-                SaleItem::create([
-                    'sale_id'     => $sale->id,
-                    'product_id'  => $productId,
-                    'custom_name' => $customName,
-                    'quantity'    => $item['quantity'],
-                    'unit_price'  => $item['unit_price'],
-                    'total_price' => $item['quantity'] * $item['unit_price'],
-                ]);
-	*/			
+				
+				$buyprice = 0;
+			
+				if ($productId) {
+					$product = Product::find($productId);
+					if ($product) {
+						$buyprice = $product->buy_price;
+					}
+				}
+		
 				SaleItem::create([
 				'sale_id'              => $sale->id,
 				'product_id'           => $productId,
 				'custom_name'          => $customName,
 				'quantity'             => $item['quantity'],
 				'unit_price'           => $item['unit_price'],
-			
+				'purchase_price'       => $item['buy_price'] ?? $buyprice,
 				// new fields
 				'item_discount_type'   => "percent",
 				'item_discount_value'  => $item['item_discount_value'],
@@ -151,14 +143,13 @@ class SaleController extends Controller
 				
 
                 // Only deduct stock for real products
-                if ($productId) {
-                    $product = Product::find($productId);
-                    if ($product) {
-                        $product->current_stock -= $item['quantity'];
-                        $product->save();
-                    }
-                }
+					
+					if ($product) {
+						$product->current_stock -= $item['quantity'];
+						$product->save();
+					}
 				}
+				
             }
         });
 		
@@ -277,8 +268,8 @@ class SaleController extends Controller
 
             $item = SaleItem::find($itemId);
             if (!$item || $item->sale_id !== $sale->id) continue;
-
-            $maxReturnable = $item->quantity - $item->returned_qty;
+			
+			$maxReturnable = $item->quantity - $item->returned_qty;
             $returnQty     = min($returnQty, $maxReturnable);
 
             if ($returnQty <= 0) continue;
@@ -293,6 +284,13 @@ class SaleController extends Controller
             if ($item->product) {
                 $item->product->increment('current_stock', $returnQty);
             }
+			
+			
+			if ($item->product_id && $item->product) {
+				$purchasePrice = $item->product->buy_price;   // from product table
+			} else {
+				$purchasePrice = $item->purchase_price;            // manual entry stored in sale_items
+			}
 
             // Collect return items for insertion
             $returnItems[] = [
@@ -300,6 +298,7 @@ class SaleController extends Controller
                 'product_id'   => $item->product_id,
                 'qty'          => $returnQty,
                 'unit_price'   => $item->unit_price,
+				'purchase_price' => $purchasePrice, 
             ];
         }
 

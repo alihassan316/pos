@@ -302,18 +302,6 @@
 
 	
 
-    function calculateRow_old(row) {
-        var qty = parseFloat(row.querySelector(".quantity").value) || 0;
-        var price = parseFloat(row.querySelector(".unit-price").value) || 0;
-		var discount = parseFloat(row.querySelector(".discount").value) || 0;
-		var total = (qty * price) - (qty * price * (discount/100));
-		//var total = (qty * price) - discount;
-		if (total < 0) total = 0;
-
-		row.querySelector(".row-total").textContent = "Rs " + total.toLocaleString();
-        //row.querySelector(".row-total").textContent = "Rs " + (qty * price).toLocaleString();
-        calculateGrandTotal();
-    }
 	
 	document.getElementById("discountValue").addEventListener("input", calculateGrandTotal);
 	document.getElementById("discountIsPercent").addEventListener("change", calculateGrandTotal);
@@ -404,7 +392,7 @@
         document.getElementById("dueAmount").textContent = "Rs " + (due < 0 ? 0 : due).toLocaleString();
     }
 	
-	function initTomSelect(selectEl) {
+function initTomSelect(selectEl) {
     return new TomSelect(selectEl, {
         valueField: "value",
         labelField: "text",
@@ -581,7 +569,7 @@
     });
     document.getElementById("paidAmount").addEventListener("input", calculateGrandTotal);
 
-    function switchToManual(row, productName) {
+    function switchToManual_old(row, productName) {
         var td = row.querySelector("td:first-child");
         var idx = row.querySelector("[name*=product_id]").name.match(/\[(\d+)\]/)[1];
         var sel = td.querySelector(".product-select");
@@ -598,6 +586,48 @@
         row.classList.add("manual-entry-row");
         row.querySelector(".unit-price").focus();
     }
+	
+	function switchToManual(row, productName) {
+
+		// --- Replace product select with manual input ---
+		var td = row.querySelector("td:first-child");
+		var idx = row.querySelector("[name*=product_id]").name.match(/\[(\d+)\]/)[1];
+		var sel = td.querySelector(".product-select");
+	
+		if (sel && sel.tomselect) {
+			sel.tomselect.destroy();
+		}
+	
+		td.innerHTML =
+			`<div class="d-flex align-items-center gap-1">
+				<input type="text" name="products[${idx}][custom_name]" 
+					   class="form-control form-control-sm product-manual-input" 
+					   placeholder="Product name" 
+					   value="${productName}" required>
+				<input type="hidden" name="products[${idx}][product_id]" value="0">
+				<span class="badge bg-warning text-dark manual-badge">Manual</span>
+			</div>`;
+	
+		// --- Convert Buy Price cell into input field ---
+		var buyPriceTd = row.querySelector(".buy-price");
+		buyPriceTd.innerHTML =
+			`<input name="products[${idx}][buy_price]" 
+					class="form-control form-control-sm buy-price-input"
+					placeholder="Buy price"  required>`;
+	
+		// --- Reset stock badge ---
+		var badge = row.querySelector(".stock-badge");
+		badge.textContent = "-";
+		badge.className = "badge bg-secondary stock-badge";
+	
+		// --- Add row flag class ---
+		row.classList.add("manual-entry-row");
+	
+		// Focus unit price input
+		row.querySelector(".unit-price").focus();
+	}
+	
+	
     document.addEventListener("click", e => {
         var btn = e.target.closest(".enter-manually-btn");
         if (!btn) return;

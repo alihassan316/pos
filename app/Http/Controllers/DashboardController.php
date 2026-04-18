@@ -8,6 +8,7 @@ use App\Models\Sale;
 use Carbon\Carbon;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
+use App\Models\SaleReturnItem;
 use Illuminate\Http\Request;
 use DB;
 
@@ -106,6 +107,81 @@ class DashboardController extends Controller
 	
 	private function generateSummary($from, $to)
 	{
+		$sales = Sale::whereBetween('created_at', [$from, $to])->get();
+	
+		$invoiceCount   = $sales->count();
+		$grossSales     = $sales->sum('subtotal');
+		$saleDiscount   = $sales->sum('discount_amount');
+		$afterDiscount  = $grossSales - $saleDiscount;
+	
+		$totalReturns = SaleReturn::whereBetween('created_at', [$from, $to])
+			->sum('refund_amount');
+	
+		$netSales = $afterDiscount - $totalReturns;
+	
+	
+		// ---------------------
+		// COST OF SALES (SALES)
+		// ---------------------
+		$costOfSales = 0;
+	
+		$saleItems = SaleItem::with('product')
+			->whereIn('sale_id', $sales->pluck('id'))
+			->get();
+	
+		foreach ($saleItems as $item) {
+			$purchasePrice = $item->product
+				? $item->product->buy_price
+				: $item->purchase_price;
+	
+			$costOfSales += ($purchasePrice * $item->quantity);
+		}
+	
+	
+		// -------------------------
+		// COST OF SALES (RETURNS)
+		// -------------------------
+		$returnItems = SaleReturnItem::whereHas('return', function ($q) use ($from, $to) {
+			$q->whereBetween('created_at', [$from, $to]);
+		})->get();
+	
+		$returnCost = 0;
+	
+		foreach ($returnItems as $r) {
+			$returnCost += ($r->purchase_price * $r->qty);
+		}
+	
+		// Subtract returned goods cost
+		$costOfSales -= $returnCost;
+	
+	
+		// ---------------------
+		// GROSS PROFIT & PERCENT
+		// ---------------------
+		$grossProfit = $afterDiscount - $costOfSales;
+	
+		$grossProfitPercent = $afterDiscount > 0
+			? ($grossProfit / $afterDiscount) * 100
+			: 0;
+	
+	
+		return view('summary', [
+			'from'               => $from->toDateString(),
+			'to'                 => $to->toDateString(),
+			'invoiceCount'       => $invoiceCount,
+			'grossSales'         => $grossSales,
+			'saleDiscount'       => $saleDiscount,
+			'afterDiscount'      => $afterDiscount,
+			'totalReturns'       => $totalReturns,
+			'netSales'           => $netSales,
+			'costOfSales'        => $costOfSales,
+			'grossProfit'        => $grossProfit,
+			'grossProfitPercent' => round($grossProfitPercent, 2),
+		]);
+	}
+		
+	private function generateSummary_old($from, $to)
+	{
 		// ---- Get Sales ----
 		$sales = Sale::whereBetween('created_at', [$from, $to])->get();
 	
@@ -130,6 +206,8 @@ class DashboardController extends Controller
 		foreach ($saleItems as $item) {
 			if ($item->product) {
 				$costOfSales += ($item->product->buy_price * $item->quantity);
+			}else{
+				$costOfSales += ($item->purchase_price * $item->quantity);
 			}
 		}
 	

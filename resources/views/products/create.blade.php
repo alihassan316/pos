@@ -62,7 +62,7 @@
                             <label class="form-label">Buy Price <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs</span>
-                                <input type="number" step="0.1" name="buy_price" class="form-control"
+                                <input  name="buy_price" class="form-control"
                                        value="{{ old('buy_price') }}" required>
                             </div>
                         </div>
@@ -76,7 +76,7 @@
                             <label class="form-label">Sell Price <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">Rs</span>
-                                <input type="number" step="0.1" name="sell_price" class="form-control"
+                                <input name="sell_price" class="form-control"
                                        value="{{ old('sell_price') }}" required>
                             </div>
                         </div>
