@@ -141,6 +141,16 @@
 </div>
 
 <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+        // Focus on the nameField input row
+        const nameInput = document.querySelector("#inputRow .nameField");
+        if (nameInput) {
+            nameInput.focus();
+        }
+    });
+
+
 // --- 1. Calculation Logic (Exactly like before) ---
 const inputRow = document.getElementById('inputRow');
 
