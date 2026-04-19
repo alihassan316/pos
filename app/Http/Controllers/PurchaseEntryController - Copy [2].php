@@ -378,55 +378,6 @@ public function submitivnoice_optimized(Request $request)
 	
 	public function addTempRow(Request $request, $invoiceId)
 	{
-		// 1. Validate the data
-		$request->validate([
-			'product_name' => 'required|string|max:255',
-			'qty' => 'required|numeric',
-			// Add other validation rules as needed
-		]);
-	
-		// 2. Handle Expiry Date Formatting
-		// Convert DD/MM/YYYY to YYYY-MM-DD for MySQL
-		$expiry = null;
-		if ($request->filled('expiry')) {
-			try {
-				$expiry = \Carbon\Carbon::createFromFormat('d/m/Y', $request->expiry)->format('Y-m-d');
-			} catch (\Exception $e) {
-				// If date is invalid, you can fallback to null or handle error
-				$expiry = null; 
-			}
-		}
-	
-		// 3. Create the Row
-		PurchaseInvoiceTemp::create([
-			'invoice_id'    => $invoiceId,
-			'sequnce'       => $request->sequnce,
-			'name'          => $request->product_name,
-			'ingrediant'    => $request->ingrediant,
-			'company'       => $request->company,
-			'qty'           => $request->qty ?? 0,
-			'bonus'         => $request->bonus ?? 0,
-			'perpack'       => $request->perpack ?? 1,
-			'batch'         => $request->batch,
-			'expiry'        => $expiry,
-			'expiry_alert'  => $request->expiry_alert,
-			'packprice'     => $request->packprice ?? 0,
-			'discount_per'  => $request->discount_per ?? 0,
-			'discount_fix'  => $request->discount_fix ?? 0,
-			'gst_per'       => $request->gst_per ?? 0,
-			'gst_fix'       => $request->gst_fix ?? 0,
-			'final_price'   => $request->final_price ?? 0,
-			'buy_price'     => $request->buy_price ?? 0,
-			'box_price'     => $request->box_price ?? 0,
-			'sale_price'    => $request->sale_price ?? 0,
-		]);
-	
-		// 4. Redirect back with a success message
-		return redirect()->back()->with('success', 'Item added to invoice successfully!');
-	}
-	
-	public function addTempRow_row(Request $request, $invoiceId)
-	{
 		$row = PurchaseInvoiceTemp::create([
 			'invoice_id'    => $invoiceId,
 			'sequnce'      => $request->sequnce,

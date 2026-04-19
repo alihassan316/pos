@@ -7,8 +7,8 @@
 <style>
     .sidebar{ display:none !important; }
     .main-wrapper{ margin-left:0 !important; }
-    .table tbody td{ padding:2px !important; }
-    .form-control, .form-select{ padding:1px !important; }
+    .table tbody td{ padding:2px !important; vertical-align: middle; }
+    .form-control, .form-select{ padding:1px !important; font-size: 13px; border-color:#c0c0c0 !important; }
     .summary-box{
         padding:8px; 
         background:#f1f1f1; 
@@ -17,10 +17,6 @@
         font-weight:bold;
         text-align:right;
     }
-    .form-control{
-        border-color:#c0c0c0 !important;
-    }
-    
     .deleteBtn {
         cursor: pointer;
         color: red;
@@ -29,51 +25,49 @@
         border: none;
         background: none;
     }
-	#productTable tr{
-		border:solid;
-	}
 </style>
 
 <div>
     <h3>Purchase Invoice #{{ $invoice->invoice_number }}</h3>
 
     <div class="mb-3">
-        <strong>Company:</strong> {{ $invoice->company_name }}<br>
-        <strong>Contact:</strong> {{ $invoice->contact }}<br>
-        <strong>Date:</strong> {{ $invoice->invoice_date }}<br>
-        <strong>Notes:</strong> {{ $invoice->notes }}
+        <strong>Company:</strong> {{ $invoice->company_name }} | <strong>Date:</strong> {{ $invoice->invoice_date }}
     </div>
 
-    <table class="table table-bordered" id="productTable">
-        <thead>
-            <tr>
-            	<th>Order</th>
-                <th style="min-width:200px;">Name</th>
-                <th>Ingredient</th>
-                <th>Company</th>
-                <th>Qty</th>
-                <th>Bonus</th>
-                <th>Per Pack</th>
-                <th>Batch</th>
-                <th>Expiry</th>
-                <th>Alert</th>
-                <th>Pack Price</th>
-                <th>Disc %</th>
-                <th>Flat Disc</th>
-                <th>GST %</th>
-                <th>GST Flat</th>
-                <th>Final Price</th>
-                <th>Buy Price</th>
-                <th>Box Price</th>
-                <th>Sale Price</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="rows">
-            {{-- Already Saved Rows --}}
-            @foreach($products as $p)
+    <form method="post" action="{{ route('invoice.add.row', $invoice->id) }}">
+        @csrf
+        <input type="hidden" name="invoice_id" value="{{ $invoice->id }}" />
+
+        <table class="table table-bordered" id="productTable">
+            <thead>
+                <tr class="table-secondary">
+                    <th>Order</th>
+                    <th style="min-width:200px;">Name</th>
+                    <th>Ingredient</th>
+                    <th>Company</th>
+                    <th>Qty</th>
+                    <th>Bonus</th>
+                    <th>Per Pack</th>
+                    <th>Batch</th>
+                    <th>Expiry</th>
+                    <th>Alert</th>
+                    <th>Pack Price</th>
+                    <th>Disc %</th>
+                    <th>Flat Disc</th>
+                    <th>GST %</th>
+                    <th>GST Flat</th>
+                    <th>Final Price</th>
+                    <th>Buy Price</th>
+                    <th>Box Price</th>
+                    <th>Sale Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="rows">
+                {{-- 1. Already Saved Rows (Static) --}}
+                @foreach($products as $p)
                 <tr data-id="{{ $p->id }}">
-                	<td>{{ $p->sequnce }}</td>
+                    <td>{{ $p->sequnce }}</td>
                     <td>{{ $p->name }}</td>
                     <td>{{ $p->ingrediant }}</td>
                     <td>{{ $p->company }}</td>
@@ -88,340 +82,150 @@
                     <td>{{ $p->discount_fix }}</td>
                     <td>{{ $p->gst_per }}</td>
                     <td>{{ $p->gst_fix }}</td>
-                    <td>{{ $p->final_price }}</td>
+                    <td class="static-final">{{ $p->final_price }}</td>
                     <td>{{ $p->buy_price }}</td>
                     <td>{{ $p->box_price }}</td>
                     <td>{{ $p->sale_price }}</td>
-                    <td><button class="deleteBtn" onclick="deleteRow({{ $p->id }}, this)">×</button></td>
+                    <td>
+                        <button type="button" class="deleteBtn" onclick="deleteSavedRow({{ $p->id }}, this)">×</button>
+                    </td>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-    
-    <div class="summary-box d-flex justify-content-between align-items-center"> 
-        <button class="btn btn-primary mb-0" id="addRowBtn">+ Add New Row</button> 
-        <div> Total Items: <span id="totalItems">0</span> &nbsp; | &nbsp; Total Cost: 
-            <span id="totalCost">0.00</span> 
-        </div> 
-    </div>
-    
-    
-    <form method="post" action="{{ route('purchases.submitivnoice') }}">
-    	@csrf
-    	<input type="hidden" name="id" value="{{ $invoice->id }}" />
-        <div class="form-group">
-        	<input type="checkbox" id="conf" name="submitinv" value="1" required />
-            <label for="conf">
-            	Confirm? Final Submit invoice
-            </label>
-                    
-        </div>
-        <div class="form-group">
-        	<button class="btn btn-success mt-3" type="submit">Submit Inovice</button>
-            <a class="btn btn-warning mt-3" href="{{url('dashboard')}}">Dashboard</a>
-        </div>
+                @endforeach
+
+                {{-- 2. The SINGLE Input Row (Submits to Controller) --}}
+                <tr id="inputRow" class="table-info">
+                    <td><input type="text" name="sequnce" class="form-control sequnce" value="{{ count($products) + 1 }}"></td>
+                    <td><input type="text" name="product_name" class="form-control nameField" required ></td>
+                    <td><input type="text" name="ingrediant" class="form-control ingredientField"></td>
+                    <td><input type="text" name="company" class="form-control companyField"></td>
+                    <td><input type="text" name="qty" class="form-control calc qtyField"></td>
+                    <td><input type="text" name="bonus" class="form-control calc bonusField"></td>
+                    <td><input type="text" name="perpack" class="form-control calc perPackField"></td>
+                    <td><input type="text" name="batch" class="form-control"></td>
+                    <td><input type="text" name="expiry" class="form-control expiryField" placeholder="DDMMYYYY"></td>
+                    <td>
+                        <select name="expiry_alert" class="form-select">
+                            @for($i=1; $i<=6; $i++) <option value="{{$i}}">{{$i}} Month</option> @endfor
+                        </select>
+                    </td>
+                    <td><input type="text" name="packprice" class="form-control calc packPriceField"></td>
+                    <td><input type="text" name="discount_per" class="form-control calc discountPerField"></td>
+                    <td><input type="text" name="discount_fix" class="form-control calc discountFlatField"></td>
+                    <td><input type="text" name="gst_per" class="form-control calc gstPerField"></td>
+                    <td><input type="text" name="gst_fix" class="form-control calc gstFlatField"></td>
+                    <td><input type="text" name="final_price" class="form-control finalField" readonly></td>
+                    <td><input type="text" name="buy_price" class="form-control buyPriceField" readonly></td>
+                    <td><input type="text" name="box_price" class="form-control calc boxPriceField"></td>
+                    <td><input type="text" name="sale_price" class="form-control salePriceField" readonly></td>
+                    <td><button type="submit" class="btn btn-success btn-sm w-100">Save</button></td>
+                </tr>
+            </tbody>
+        </table>
     </form>
-    
-    
+
+    <div class="summary-box">
+        Total Items: <span id="totalItems">0</span> &nbsp; | &nbsp; 
+        Total Cost: <span id="totalCost">0.00</span>
+    </div>
+
+    <form method="post" action="{{ route('purchases.submitivnoice') }}" class="mt-3">
+        @csrf
+        <input type="hidden" name="id" value="{{ $invoice->id }}" />
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="conf" name="submitinv" value="1" required>
+            <label class="form-check-label" for="conf">Confirm? Final Submit invoice</label>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit Invoice</button>
+        <a class="btn btn-warning" href="{{url('dashboard')}}">Dashboard</a>
+    </form>
 </div>
 
 <script>
-let invoiceId = {{ $invoice->id }};
-let saveUrl = "{{ route('invoice.add.row', ':id') }}".replace(':id', {{ $invoice->id }});
-let deleteUrl = "{{ route('invoice.delete.row', ':id') }}"; // pass :id dynamically
-let rowIndex = 0;
+// --- 1. Calculation Logic (Exactly like before) ---
+const inputRow = document.getElementById('inputRow');
 
-addEditableRow();
+function calculateRow() {
+    let qty = parseFloat(inputRow.querySelector(".qtyField").value) || 0;
+    let bonus = parseFloat(inputRow.querySelector(".bonusField").value) || 0;
+    let perPack = parseFloat(inputRow.querySelector(".perPackField").value) || 1;
+    let packPrice = parseFloat(inputRow.querySelector(".packPriceField").value) || 0;
+    let dPercent = parseFloat(inputRow.querySelector(".discountPerField").value) || 0;
+    let dFlat = parseFloat(inputRow.querySelector(".discountFlatField").value) || 0;
+    let gstPercent = parseFloat(inputRow.querySelector(".gstPerField").value) || 0;
+    let gstFlat = parseFloat(inputRow.querySelector(".gstFlatField").value) || 0;
+    let boxPrice = parseFloat(inputRow.querySelector(".boxPriceField").value) || 0;
 
-// Update totals
+    let baseAmount = qty * packPrice;
+    let discountAmount = (baseAmount * dPercent / 100) + dFlat;
+    let gstAmount = (baseAmount * gstPercent / 100) + gstFlat;
+    let finalPrice = baseAmount - discountAmount + gstAmount;
+
+    let totalUnits = (qty + bonus) * perPack;
+    let buyPrice = totalUnits > 0 ? finalPrice / totalUnits : 0;
+
+    inputRow.querySelector(".finalField").value = finalPrice.toFixed(2);
+    inputRow.querySelector(".buyPriceField").value = buyPrice.toFixed(2);
+
+    if (boxPrice > 0 && perPack > 0) {
+        inputRow.querySelector(".salePriceField").value = (boxPrice / perPack).toFixed(2);
+    }
+    
+    updateSummary();
+}
+
+// Attach listeners to all "calc" fields in the input row
+inputRow.querySelectorAll(".calc").forEach(input => {
+    input.addEventListener("input", calculateRow);
+});
+
+// --- 2. Summary Logic (Totals everything) ---
 function updateSummary() {
-	
-    let rows = document.querySelectorAll("#rows tr");
     let totalItems = 0;
     let totalCost = 0;
 
-    rows.forEach(tr => {
-        // Skip empty editable rows (no name)
-        let nameInput = tr.querySelector(".nameField");
-        let nameText = tr.cells[1]?.innerText || "";
-
-        if ((nameInput && nameInput.value.trim() === "") || (!nameInput && nameText.trim() === "")) {
-            return;
-        }
-
+    // Static rows
+    document.querySelectorAll(".static-final").forEach(td => {
+        totalCost += parseFloat(td.innerText) || 0;
         totalItems++;
-
-        let finalInput = tr.querySelector(".finalField");
-        let finalText = tr.cells[15]; // static final price column
-        let val = 0;
-        if(finalInput) val = parseFloat(finalInput.value) || 0;
-        else if(finalText) val = parseFloat(finalText.innerText) || 0;
-		
-		
-        totalCost += val;
     });
+
+    // Current input row (if it has a name)
+    let currentFinal = parseFloat(inputRow.querySelector(".finalField").value) || 0;
+    if (inputRow.querySelector(".nameField").value.trim() !== "") {
+        totalCost += currentFinal;
+        totalItems++;
+    }
 
     document.getElementById("totalItems").innerText = totalItems;
     document.getElementById("totalCost").innerText = totalCost.toFixed(2);
 }
 
-// Add new editable row
-document.getElementById("addRowBtn").addEventListener("click", function() {
-    addEditableRow();
+// --- 3. Expiry Formatting ---
+inputRow.querySelector(".expiryField").addEventListener("blur", function() {
+    let val = this.value.trim();
+    if (/^\d{8}$/.test(val)) {
+        let d = val.substr(0, 2);
+        let m = val.substr(2, 2);
+        let y = val.substr(4, 4);
+        this.value = `${d}/${m}/${y}`;
+    }
 });
 
-function attachExpiryHandler(input) {
-    input.addEventListener("blur", function() {
-        let val = this.value.trim();
-
-        if (!val) {
-            // Allow empty
-            return;
-        }
-
-        let day, month, year;
-
-        // Handle 8-digit number like 30032028
-        if(/^\d{8}$/.test(val)) {
-            day = val.substr(0,2);
-            month = val.substr(2,2);
-            year = val.substr(4,4);
-        }
-        // Handle 2/2/4 or 2-2-4 formats
-        else if(/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(val)) {
-            [day, month, year] = val.split(/[-\/]/);
-            if(day.length === 1) day = '0' + day;
-            if(month.length === 1) month = '0' + month;
-        }
-        else {
-            // Invalid input → leave empty
-            this.value = "";
-            return;
-        }
-
-        // Validate date
-        let dateStr = `${year}-${month}-${day}`;
-        let dateObj = new Date(dateStr);
-        if(isNaN(dateObj.getTime())) {
-            this.value = "";
-        } else {
-            // Format as dd/mm/yyyy
-            this.value = `${day}/${month}/${year}`;
-        }
-    });
-}
-
-// Attach to already existing rows
-document.querySelectorAll(".expiryField").forEach(input => attachExpiryHandler(input));
-
-
-function addEditableRow() {
-    let tr = document.createElement("tr");
-	
-	let nextSeq = document.querySelectorAll("#rows tr").length + 1;
-
-    tr.innerHTML = `
-		<td><input type="text" class="form-control sequnce" value="${nextSeq}" /></td>
-        <td><input type="text" data-field="prname" name="prname[]" class="form-control nameField"  autocomplete="on" /></td>
-        <td><input type="text" data-field="ingrediant" name="ingrediant[]" class="form-control ingredientField"  autocomplete="on" /></td>
-		<td><input type="text" data-field="company" name="company[]" class="form-control companyField"  autocomplete="on" /></td>
-        <td><input type="text" class="form-control calc qtyField" /></td>
-        <td><input type="text" class="form-control calc bonusField" /></td>
-        <td><input type="text" class="form-control calc perPackField" /></td>
-        <td><input type="text" class="form-control batchField" /></td>
-        <td><input type="text" class="form-control expiryField" /></td>
-        <td><select type="text" class="form-control expiryAlertField">
-			<option value="1">1 Month</option>
-			<option value="2">2 Month</option>
-			<option value="3">3 Month</option>
-			<option value="4">4 Month</option>
-			<option value="5">5 Month</option>
-			<option value="6">6 Month</option>
-			
-		</select>
-		</td>
-        <td><input type="text" class="form-control calc packPriceField" /></td>
-        <td><input type="text" class="form-control calc discountPerField" /></td>
-        <td><input type="text" class="form-control calc discountFlatField" /></td>
-        <td><input type="text" class="form-control calc gstPerField" /></td>
-        <td><input type="text" class="form-control calc gstFlatField" /></td>
-        <td><input type="text" class="form-control finalField" readonly /></td>
-        <td><input type="text" class="form-control buyPriceField" readonly /></td>
-        <td><input type="text" class="form-control calc boxPriceField" /></td>
-        <td><input type="text" class="form-control salePriceField" /></td>
-        <td><button class="btn btn-success btn-sm saveRow">Save</button></td>
-    `;
-
-    document.getElementById("rows").appendChild(tr);
-
-    // Attach save click
-    tr.querySelector(".saveRow").addEventListener("click", function () {
-        saveRow(tr);
-    });
-
-    // Attach calculation listeners
-    tr.querySelectorAll(".calc").forEach(input => input.addEventListener("input", () => calculateRow(tr)));
-    tr.querySelector(".boxPriceField").addEventListener("input", () => calculateRow(tr));
-    tr.querySelector(".perPackField").addEventListener("input", () => calculateRow(tr));
-
-    // Attach expiry handler to this new row
-    attachExpiryHandler(tr.querySelector(".expiryField"));
-
-    rowIndex++;
-}
-
-// Save row
-function saveRow(tr) {
-    let data = {
-		sequnce: tr.querySelector(".sequnce").value,
-        name: tr.querySelector(".nameField").value,
-        ingrediant: tr.querySelector(".ingredientField").value,
-		company: tr.querySelector(".companyField").value,
-        qty: tr.querySelector(".qtyField").value,
-        bonus: tr.querySelector(".bonusField").value,
-        perpack: tr.querySelector(".perPackField").value,
-        batch: tr.querySelector(".batchField").value,
-        expiry: formatDateForMySQL(tr.querySelector(".expiryField").value),
-        expiry_alert: tr.querySelector(".expiryAlertField").value,
-        packprice: tr.querySelector(".packPriceField").value,
-        discount_per: tr.querySelector(".discountPerField").value,
-        discount_fix: tr.querySelector(".discountFlatField").value,
-        gst_per: tr.querySelector(".gstPerField").value,
-        gst_fix: tr.querySelector(".gstFlatField").value,
-        final_price: tr.querySelector(".finalField").value,
-        buy_price: tr.querySelector(".buyPriceField").value,
-        box_price: tr.querySelector(".boxPriceField").value,
-        sale_price: tr.querySelector(".salePriceField").value,
-    };
-
-    fetch(saveUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-        },
-        body: JSON.stringify(data),
-    })
-    .then(res => res.json())
-    .then(res => {
-        if(res.success && res.row.id) {
-            convertToStaticRow(tr, res.row);
-            addEditableRow();
-            let newRow = document.querySelector("#rows tr:last-child .nameField");
-            if(newRow) newRow.focus();
-        }
-    });
-}
-
-// Convert editable row → static row
-function convertToStaticRow(tr, row) {
-    function v(x) { return x === null || x === undefined ? "" : x; }
-
-    tr.dataset.id = row.id; // store ID for delete
-    tr.innerHTML = `
-		<td>${v(row.sequnce)}</td>
-        <td>${v(row.name)}</td>
-        <td>${v(row.ingrediant)}</td>
-		<td>${v(row.company)}</td>
-        <td>${v(row.qty)}</td>
-        <td>${v(row.bonus)}</td>
-        <td>${v(row.perpack)}</td>
-        <td>${v(row.batch)}</td>
-        <td>${v(row.expiry)}</td>
-        <td>${row.expiry_alert ? row.expiry_alert + ' Month' : ''}</td>
-        <td>${v(row.packprice)}</td>
-        <td>${v(row.discount_per)}</td>
-        <td>${v(row.discount_fix)}</td>
-        <td>${v(row.gst_per)}</td>
-        <td>${v(row.gst_fix)}</td>
-        <td>${v(row.final_price)}</td>
-        <td>${v(row.buy_price)}</td>
-        <td>${v(row.box_price)}</td>
-        <td>${v(row.sale_price)}</td>
-        <td><button class="deleteBtn" onclick="deleteRow(${row.id}, this)">×</button></td>
-    `;
-    updateSummary();
-}
-
-// Delete row
-function deleteRow(id, btn) {
-    if(!confirm("Are you sure you want to delete this row?")) return;
-
-    let url = deleteUrl.replace(':id', id);
-
-    fetch(url, {
+// --- 4. Delete Saved Rows (AJAX) ---
+function deleteSavedRow(id, btn) {
+    if(!confirm("Delete this row?")) return;
+    fetch("{{ route('invoice.delete.row', ':id') }}".replace(':id', id), {
         method: "DELETE",
-        headers: {
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-        }
-    })
-    .then(res => res.json())
-    .then(res => {
+        headers: { "X-CSRF-TOKEN": "{{ csrf_token() }}" }
+    }).then(res => res.json()).then(res => {
         if(res.success) {
-            let tr = btn.closest("tr");
-            tr.remove();
+            btn.closest("tr").remove();
             updateSummary();
         }
     });
 }
 
-// Format expiry date
-function formatDateForMySQL(dateStr) {
-    if(!dateStr) return null;
-    const parts = dateStr.split('/');
-    if(parts.length !== 3) return null;
-    return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-}
-
-// Calculate row prices
-function calculateRow(tr) {
-    let name = tr.querySelector(".nameField").value.trim();
-    if(name === "") {
-        tr.querySelector(".finalField").value = "";
-        tr.querySelector(".buyPriceField").value = "";
-        tr.querySelector(".salePriceField").value = "";
-        updateSummary();
-        return;
-    }
-
-    let qty = parseFloat(tr.querySelector(".qtyField").value) || 0;
-    let bonus = parseFloat(tr.querySelector(".bonusField").value) || 0;
-    let perPack = parseFloat(tr.querySelector(".perPackField").value) || 1;
-    let packPrice = parseFloat(tr.querySelector(".packPriceField").value) || 0;
-    let dPercent = parseFloat(tr.querySelector(".discountPerField").value) || 0;
-    let dFlat = parseFloat(tr.querySelector(".discountFlatField").value) || 0;
-    let gstPercent = parseFloat(tr.querySelector(".gstPerField").value) || 0;
-    let gstFlat = parseFloat(tr.querySelector(".gstFlatField").value) || 0;
-    let boxPrice = parseFloat(tr.querySelector(".boxPriceField").value) || 0;
-
-    let totalQty = qty + bonus;
-    let totalUnits = totalQty * (perPack || 1);
-    let baseAmount = qty * packPrice;
-    let discountAmount = (baseAmount * dPercent / 100) + dFlat;
-    let gstAmount = (baseAmount * gstPercent / 100) + gstFlat;
-    let finalPrice = baseAmount - discountAmount + gstAmount;
-    let buyPrice = totalUnits > 0 ? finalPrice / totalUnits : 0;
-
-    tr.querySelector(".finalField").value = finalPrice.toFixed(2);
-    tr.querySelector(".buyPriceField").value = buyPrice.toFixed(2);
-
-    let salePrice = (boxPrice > 0 && perPack > 0) ? (boxPrice / perPack).toFixed(2) : "";
-    tr.querySelector(".salePriceField").value = salePrice;
-
-    updateSummary();
-}
-
-// Initial summary update
-window.addEventListener('DOMContentLoaded', () => updateSummary());
-
-
-
-// Default close date if user input is invalid
-
-
-
-
-
+// Initial calculation
+updateSummary();
 </script>
-
 @endsection
