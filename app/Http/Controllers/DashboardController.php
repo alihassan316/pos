@@ -65,7 +65,7 @@ class DashboardController extends Controller
 	
 	
 	$outOfStockCount = Product::where('current_stock', '<=', 0)->count();
-	$totalInventoryAmount = Product::sum(DB::raw('current_stock * unit_sell_price'));
+	$totalInventoryAmount = Product::sum(DB::raw('current_stock * buy_price'));
 
     return view('dashboard', compact(
         'todaySales', 'todayCount',
