@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
     $lowStockProducts = Product::where('current_stock', '<=', 10)
         ->orderBy('current_stock')
-        ->take(20)
+        ->take(50)
         ->get();
 
     /** EXPIRY 
@@ -104,8 +104,141 @@ class DashboardController extends Controller
 	
 		return $this->generateSummary($from, $to);
 	}
-	
+
 	private function generateSummary($from, $to)
+	{
+		// FULL RANGE SALES (TOTALS)
+		$sales = Sale::whereBetween('created_at', [$from, $to])->get();
+	
+		$invoiceCount   = $sales->count();
+		$grossSales     = $sales->sum('subtotal');
+		$saleDiscount   = $sales->sum('discount_amount');
+		$afterDiscount  = $grossSales - $saleDiscount;
+	
+		$totalReturns = SaleReturn::whereBetween('created_at', [$from, $to])
+			->sum('refund_amount');
+	
+		$netSales = $afterDiscount - $totalReturns;
+	
+		// TOTAL COST OF SALES
+		$costOfSales = 0;
+	
+		$saleItems = SaleItem::with('product')
+			->whereIn('sale_id', $sales->pluck('id'))
+			->get();
+	
+		foreach ($saleItems as $item) {
+			$purchasePrice = $item->product
+				? $item->product->buy_price
+				: $item->purchase_price;
+	
+			$costOfSales += ($purchasePrice * $item->quantity);
+		}
+	
+		$returnItems = SaleReturnItem::whereHas('return', function ($q) use ($from, $to) {
+			$q->whereBetween('created_at', [$from, $to]);
+		})->get();
+	
+		$returnCost = 0;
+	
+		foreach ($returnItems as $r) {
+			$returnCost += ($r->purchase_price * $r->qty);
+		}
+	
+		$costOfSales -= $returnCost;
+	
+		$grossProfit = $afterDiscount - $costOfSales;
+	
+		$grossProfitPercent = $afterDiscount > 0
+			? ($grossProfit / $afterDiscount) * 100
+			: 0;
+	
+		// -----------------------------------------------------
+		// DAILY BREAKDOWN
+		// -----------------------------------------------------
+		$daily = [];
+		$date = $from->copy();
+	
+		while ($date->lte($to)) {
+	
+			$dayStart = $date->copy()->startOfDay();
+			$dayEnd   = $date->copy()->endOfDay();
+	
+			$daySales = Sale::whereBetween('created_at', [$dayStart, $dayEnd])->get();
+	
+			$d_invoiceCount = $daySales->count();
+			$d_grossSales   = $daySales->sum('subtotal');
+			$d_discount     = $daySales->sum('discount_amount');
+			$d_afterDisc    = $d_grossSales - $d_discount;
+	
+			$d_returns = SaleReturn::whereBetween('created_at', [$dayStart, $dayEnd])
+				->sum('refund_amount');
+	
+			$d_netSales = $d_afterDisc - $d_returns;
+	
+			// COST OF SALES DAY-WISE
+			$d_cost = 0;
+	
+			$d_saleItems = SaleItem::with('product')
+				->whereIn('sale_id', $daySales->pluck('id'))
+				->get();
+	
+			foreach ($d_saleItems as $item) {
+				$purchasePrice = $item->product
+					? $item->product->buy_price
+					: $item->purchase_price;
+	
+				$d_cost += ($purchasePrice * $item->quantity);
+			}
+	
+			$d_returnItems = SaleReturnItem::whereHas('return', function ($q) use ($dayStart, $dayEnd) {
+				$q->whereBetween('created_at', [$dayStart, $dayEnd]);
+			})->get();
+	
+			$d_returnCost = 0;
+			foreach ($d_returnItems as $r) {
+				$d_returnCost += ($r->purchase_price * $r->qty);
+			}
+	
+			$d_cost -= $d_returnCost;
+	
+			$d_profit = $d_afterDisc - $d_cost;
+	
+			$daily[] = [
+				'date' => $date->toDateString(),
+				'invoiceCount' => $d_invoiceCount,
+				'grossSales' => $d_grossSales,
+				'discount' => $d_discount,
+				'afterDiscount' => $d_afterDisc,
+				'returns' => $d_returns,
+				'netSales' => $d_netSales,
+				'cost' => $d_cost,
+				'profit' => $d_profit,
+				'profitPercent' => $d_afterDisc > 0 ? ($d_profit / $d_afterDisc) * 100 : 0,
+			];
+	
+			$date->addDay();
+		}
+	
+		return view('summary', [
+			'from'               => $from->toDateString(),
+			'to'                 => $to->toDateString(),
+			'invoiceCount'       => $invoiceCount,
+			'grossSales'         => $grossSales,
+			'saleDiscount'       => $saleDiscount,
+			'afterDiscount'      => $afterDiscount,
+			'totalReturns'       => $totalReturns,
+			'netSales'           => $netSales,
+			'costOfSales'        => $costOfSales,
+			'grossProfit'        => $grossProfit,
+			'grossProfitPercent' => round($grossProfitPercent, 2),
+	
+			// add daily data
+			'daily'              => $daily,
+		]);
+	}
+	
+	private function generateSummary_working($from, $to)
 	{
 		$sales = Sale::whereBetween('created_at', [$from, $to])->get();
 	

@@ -14,26 +14,52 @@
     </a>
 </div>
 
-<form method="GET" action="{{ route('products.index') }}" class="mb-3">
-    <div class="input-group">
-        <input 
-            type="text" 
-            name="search" 
-            value="{{ request('search') }}"
-            class="form-control"
-            placeholder="Search by name, company or ingredients..."
-        >
+<div class="d-flex justify-content-between mb-3">
+
+    {{-- Filter Buttons --}}
+    <div class="btn-group" role="group">
+        <a href="{{ route('products.index', ['filter' => 'all', 'search' => request('search')]) }}"
+           class="btn btn-outline-secondary {{ request('filter') == 'all' || !request('filter') ? 'active' : '' }}">
+            All
+        </a>
+
+        <a href="{{ route('products.index', ['filter' => 'low_stock', 'search' => request('search')]) }}"
+           class="btn btn-outline-warning {{ request('filter') == 'low_stock' ? 'active' : '' }}">
+            Low Stock
+        </a>
+
+        <a href="{{ route('products.index', ['filter' => 'out_stock', 'search' => request('search')]) }}"
+           class="btn btn-outline-danger {{ request('filter') == 'out_stock' ? 'active' : '' }}">
+            Out of Stock
+        </a>
+
+        <a href="{{ route('products.index', ['filter' => 'expired', 'search' => request('search')]) }}"
+           class="btn btn-outline-dark {{ request('filter') == 'expired' ? 'active' : '' }}">
+            Expired
+        </a>
+    </div>
+
+    {{-- Search Box --}}
+    <form method="GET" action="{{ route('products.index') }}" class="d-flex">
+        <input type="hidden" name="filter" value="{{ request('filter') }}">
+
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               class="form-control me-2"
+               placeholder="Search name, company, ingredient...">
+
         <button class="btn btn-primary" type="submit">
-            <i class="bi bi-search"></i> Search
+            <i class="bi bi-search"></i>
         </button>
 
-        @if(request('search'))
-        <a href="{{ route('products.index') }}" class="btn btn-secondary">
+        @if(request('search') || request('filter'))
+        <a href="{{ route('products.index') }}" class="btn btn-secondary ms-2">
             <i class="bi bi-x-lg"></i>
         </a>
         @endif
-    </div>
-</form>
+    </form>
+</div>
 
 <div class="card">
     <div class="card-body p-0">

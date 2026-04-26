@@ -51,7 +51,9 @@
             <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
             <div class="stat-value">{{ $lowStockCount }}</div>
             <div class="stat-label">Low Stock (&lt; 10)</div>
-            <div class="stat-sub">&nbsp;</div>
+             <div class="stat-sub">
+            	<a href="{{ route('products.index') }}?filter=low_stock" class="btn btn-primary">Manage</a>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -59,7 +61,9 @@
             <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
             <div class="stat-value">{{ $outOfStockCount }}</div>
             <div class="stat-label">Out of Stock</div>
-            <div class="stat-sub">&nbsp;</div>
+            <div class="stat-sub">
+            	<a href="{{ route('products.index') }}?filter=out_stock" class="btn btn-primary">Manage</a>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -86,7 +90,7 @@
                     <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
                     Low Stock Products
                 </h5>
-                <a href="{{ route('products.index') }}" class="btn btn-sm btn-outline-warning">Manage</a>
+                <a href="{{ route('products.index') }}?filter=low_stock" class="btn btn-sm btn-outline-warning">Manage</a>
             </div>
 
             <div class="card-body p-0">

@@ -44,6 +44,11 @@ class ProductsInvoice extends Model
 		'expiry_action',
         'purchase_invoice_id',
     ];
+	
+	public function purchaseInvoice()
+	{
+		return $this->belongsTo(PurchaseInvoice::class, 'purchase_invoice_id', 'id');
+	}
 
    // public function productsInvoice()
 	//{

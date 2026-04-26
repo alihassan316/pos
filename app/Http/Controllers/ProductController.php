@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductsInvoice;
 use App\Models\SaleItem;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -10,7 +11,54 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     // List products
-   public function index(Request $request)
+	public function index(Request $request)
+	{
+		$query = Product::query();
+	
+		// Search filter
+		if ($request->search) {
+			$search = $request->search;
+	
+			$query->where(function ($q) use ($search) {
+				$q->where('name', 'LIKE', "%{$search}%")
+				  ->orWhere('company', 'LIKE', "%{$search}%")
+				  ->orWhere('ingredient', 'LIKE', "%{$search}%");
+			});
+		}
+	
+		// Stock / Expiry filter
+		switch ($request->filter) {
+	
+			case 'low_stock':
+				$query->where('current_stock', '<=', 5)
+					  ->where('current_stock', '>', 0);
+				break;
+	
+			case 'out_stock':
+				$query->where('current_stock', '=', 0);
+				break;
+	
+			case 'expired':
+				$query->whereNotNull('expiry')
+					  ->whereDate('expiry', '<', today());
+				break;
+	
+			default:
+				// "all" or unknown → no filter
+				break;
+		}
+	
+		$products = $query
+			->orderBy('name')
+			->paginate(10);
+	
+		$products->appends($request->only(['search', 'filter']));
+	
+		return view('products.index', compact('products'));
+	}
+	
+	
+   public function index_o(Request $request)
 	{
 		$query = Product::query();
 	
@@ -31,6 +79,34 @@ class ProductController extends Controller
 	}
 	
 	public function history(Product $product)
+	{
+		// Sales history
+		$saleItems = SaleItem::with('sale')
+			->where('product_id', $product->id)
+			->orderByDesc('id')
+			->get();
+	
+		// Total profit calculation
+		$totalProfit = 0;
+		foreach ($saleItems as $item) {
+			$buy  = $item->purchase_price ?? $product->buy_price;
+			$sell = $item->unit_price;
+			$qty  = $item->quantity;
+			$totalProfit += (($sell - $buy) * $qty);
+		}
+	
+		// Purchase history — matched by product name
+		//$purchaseHistory = ProductsInvoice::where('name', $product->name)
+		//	->orderByDesc('id')
+		//	->get();
+		
+		$purchaseHistory = ProductsInvoice::with('purchaseInvoice')
+    		->where('name', $product->name)->orderByDesc('id')->get();
+	
+		return view('products.history', compact('product', 'saleItems', 'purchaseHistory', 'totalProfit'));
+	}
+	
+	public function history_bk(Product $product)
 	{
 		// Fetch sale items of this product, with sale info
 		$saleItems = SaleItem::with('sale')->where('product_id', $product->id)->orderByDesc('id')->get();

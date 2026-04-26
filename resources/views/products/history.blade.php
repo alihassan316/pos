@@ -22,6 +22,60 @@
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Purchase History</h5>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0 table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Qty</th>
+                        <th>Bonus</th>
+                        <th>Buy Price</th>
+                        <th>Final Buy</th>
+                        <th>GST</th>
+                        <th>Discount</th>
+                        <th>Total Qty</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                @forelse($purchaseHistory as $i => $p)
+                    @php
+                        $totalQty = ($p->qty ?? 0) + ($p->bonus ?? 0);
+                    @endphp
+
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $p->purchaseInvoice->invoice_number ?? '-' }}</td>
+                        <td>{{ $p->created_at ? $p->created_at->format('d-M-Y') : '-' }}</td>
+                        <td>{{ $p->qty }}</td>
+                        <td>{{ $p->bonus }}</td>
+                        <td>{{ number_format($p->buy_price, 2) }}</td>
+                        <td>{{ number_format($p->final_buy_price, 2) }}</td>
+                        <td>{{ $p->gst }}%</td>
+                        <td>{{ $p->discount_percent }}%</td>
+                        <td>{{ $totalQty }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="10" class="text-center py-4">
+                            No purchase history found for this product.
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 
 <div class="card">
     <div class="card-header">

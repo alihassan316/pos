@@ -55,18 +55,37 @@
             </thead>
 
             <tbody>
-                <tr>
-                    <td>{{ $from }} → {{ $to }}</td>
+
+                {{-- Daily Rows --}}
+                @foreach($daily as $d)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($d['date'])->format('d-m-Y') }}</td>
+                        <td>{{ $d['invoiceCount'] }}</td>
+                        <td>{{ number_format($d['grossSales'], 2) }}</td>
+                        <td class="text-danger">-{{ number_format($d['discount'], 2) }}</td>
+                        <td>{{ number_format($d['afterDiscount'], 2) }}</td>
+                        <td class="text-danger">{{ number_format($d['returns'], 2) }}</td>
+                        <td>{{ number_format($d['netSales'], 2) }}</td>
+                        <td>{{ number_format($d['cost'], 2) }}</td>
+                        <td>{{ number_format($d['profit'], 2) }}</td>
+                        <td>{{ number_format($d['profitPercent'], 2) }}%</td>
+                    </tr>
+                @endforeach
+            
+                {{-- Final Totals Row --}}
+                <tr class="table-secondary fw-bold">
+                    <td>Total</td>
                     <td>{{ $invoiceCount }}</td>
                     <td>{{ number_format($grossSales, 2) }}</td>
                     <td class="text-danger">-{{ number_format($saleDiscount, 2) }}</td>
                     <td>{{ number_format($afterDiscount, 2) }}</td>
                     <td class="text-danger">{{ number_format($totalReturns, 2) }}</td>
-                    <td class="fw-bold">{{ number_format($netSales, 2) }}</td>
+                    <td>{{ number_format($netSales, 2) }}</td>
                     <td>{{ number_format($costOfSales, 2) }}</td>
-                    <td class="fw-bold">{{ number_format($grossProfit, 2) }}</td>
-                    <td class="fw-bold">{{ number_format($grossProfitPercent, 2) }}%</td>
+                    <td>{{ number_format($grossProfit, 2) }}</td>
+                    <td>{{ number_format($grossProfitPercent, 2) }}%</td>
                 </tr>
+            
             </tbody>
         </table>
 

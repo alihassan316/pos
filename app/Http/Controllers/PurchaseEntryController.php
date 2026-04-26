@@ -143,6 +143,7 @@ class PurchaseEntryController extends Controller
 			$mainProduct->category_id = $p->category_id ?? null;
 			$mainProduct->ingredient = $p->ingrediant ?? null;
 			$mainProduct->company = $p->company ?? null;
+			$mainProduct->expiry = $p->expiry ?? null;
 			$mainProduct->batch_no = $p->batch;
 			$mainProduct->unit_sell_price = floatval($p->sale_price ?? 0);
 			$mainProduct->sell_price = floatval($p->sale_price ?? 0) * $perPack;
