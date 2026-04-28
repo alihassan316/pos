@@ -561,6 +561,18 @@ function initTomSelect(selectEl) {
     </button></td>`;
         tbody.appendChild(tr);
         initTomSelect(tr.querySelector(".product-select")).load("");
+		
+		const selectEl = tr.querySelector(".product-select");
+		
+
+if (selectEl.tomselect) {
+    selectEl.tomselect.destroy();
+}
+
+const ts = initTomSelect(selectEl);
+
+ts.control_input.focus();
+	
         rowIndex++;
     });
     document.getElementById("invoiceTable").addEventListener("click", e => {
@@ -811,6 +823,14 @@ document.getElementById("invoiceTable").addEventListener("keydown", function(e) 
 document.getElementById("invoiceTable").addEventListener("click", function(e) {
     if (e.target.closest(".add-row-inline")) {
         document.getElementById("addRow").click();
+    }
+});
+
+window.addEventListener("load", function () {
+    const firstSelect = document.querySelector(".product-select");
+
+    if (firstSelect && firstSelect.tomselect) {
+        firstSelect.tomselect.control_input.focus();
     }
 });
 
