@@ -34,6 +34,7 @@
                     <tr>
                         <th>#</th>
                         <th>Invoice</th>
+                        <th>Brooker</th>
                         <th>Date</th>
                         <th>Qty</th>
                         <th>Bonus</th>
@@ -54,6 +55,7 @@
                     <tr>
                         <td>{{ $i + 1 }}</td>
                         <td>{{ $p->purchaseInvoice->invoice_number ?? '-' }}</td>
+                        <td>{{$p->purchaseInvoice->company_name}}</td>
                         <td>{{ $p->created_at ? $p->created_at->format('d-M-Y') : '-' }}</td>
                         <td>{{ $p->qty }}</td>
                         <td>{{ $p->bonus }}</td>
