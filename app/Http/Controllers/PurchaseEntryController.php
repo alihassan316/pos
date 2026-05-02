@@ -25,8 +25,6 @@ class PurchaseEntryController extends Controller
 		return view('purchases.show', compact('invoice'));
 	}
 	
-	
-	
 	public function destroy($id)
 	{
 		$invoice = PurchaseInvoice::findOrFail($id);
@@ -60,7 +58,6 @@ class PurchaseEntryController extends Controller
 	
     public function create()
     {
-		
         return view('purchases.create');
     }
 	
@@ -80,12 +77,10 @@ class PurchaseEntryController extends Controller
 		
 		return redirect()->route('invoice.update.page', $inv->id);
 		
-			
 	}
 	
 	public function submitivnoice(Request $request)
 {
-	
 	
 	ini_set('max_execution_time', 600); 
     ini_set('memory_limit', '1024M');
@@ -148,7 +143,7 @@ class PurchaseEntryController extends Controller
 			$mainProduct->unit_sell_price = floatval($p->sale_price ?? 0);
 			$mainProduct->sell_price = floatval($p->sale_price ?? 0) * $perPack;
 			$mainProduct->buy_price = floatval($p->buy_price ?? 0);
-			$mainProduct->current_stock = ($mainProduct->current_stock ?? 0) + ($p->qty * $perPack);
+			$mainProduct->current_stock = ($mainProduct->current_stock ?? 0) + ($p->qty * $perPack) + ($bonus * $perPack);
 			$mainProduct->is_box = $perPack > 1 ? 1 : 0;
 			$mainProduct->items_per_box = $perPack;
 			$mainProduct->status = 1;
