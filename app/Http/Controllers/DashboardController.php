@@ -92,6 +92,55 @@ class DashboardController extends Controller
 		return $this->generateSummary($from, $to);
 	}
 	
+	public function searchProduct(Request $request)
+	{
+		$q = $request->q;
+	
+		if(strlen($q) < 3) {
+			return response()->json([]);
+		}
+	
+	/*
+		$result = DB::table('products_invoice')
+			->where('name', 'LIKE', "%$q%")->orderBy('name', 'asc')->limit(50)->get()
+			->map(function ($item) {
+				return [
+					'id' => $item->id,
+					'name' => $item->name ?? '',
+					'company' => $item->company ?? '',
+					'ingredient' => $item->ingredient ?? '',
+					'items_per_box' => $item->items_per_box ?? '',
+				];
+			});
+	*/
+	
+		$sub = DB::table('products_invoice')
+    ->select(DB::raw('MAX(id) as id'))
+    ->where('name', 'LIKE', "%$q%")
+    ->groupBy('name');
+
+$result = DB::table('products_invoice as p')
+    ->joinSub($sub, 'latest', function ($join) {
+        $join->on('p.id', '=', 'latest.id');
+    })
+    ->orderBy('p.name', 'asc')
+    ->limit(50)
+    ->get()
+    ->map(function ($item) {
+        return [
+            'id' => $item->id,
+            'name' => $item->name ?? '',
+            'company' => $item->company ?? '',
+            'ingredient' => $item->ingredient ?? '',
+            'items_per_box' => $item->items_per_box ?? '',
+			'expiry_alert_months' => $item->expiry_alert_months ?? '',
+        ];
+    });
+	
+	
+		return response()->json($result);
+	}
+	
 	public function summaryFilter(Request $request)
 	{
 		$request->validate([

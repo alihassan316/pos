@@ -16,6 +16,8 @@ Route::get('/keep-alive', function () {
     return response()->json(['status' => 'ok']);
 });
 
+
+
 // Dashboard (already protected)
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -28,6 +30,9 @@ Route::middleware(['auth'])->group(function () {
 	
 	Route::get('/summary', [DashboardController::class, 'summary'])->name('summary');
 	Route::post('/summary', [DashboardController::class, 'summaryFilter'])->name('summary.filter');
+	
+	
+	Route::get('/invoice/search-product', [DashboardController::class, 'searchProduct'])->name('invoice.search.product');
 
     // Products (protected)
     Route::resource('products', ProductController::class);

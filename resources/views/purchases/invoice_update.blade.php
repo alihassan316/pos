@@ -25,6 +25,26 @@
         border: none;
         background: none;
     }
+
+    #searchResults {
+        position:absolute;
+        background:white;
+        border:1px solid #ccc;
+        width:100%;
+        z-index:9999;
+        display:none;
+        max-height:150px;
+        overflow-y:auto;
+    }
+    #searchResults div {
+        padding:4px;
+        cursor:pointer;
+        border-bottom:1px solid #eee;
+        font-size:13px;
+    }
+    #searchResults div:hover {
+        background:#f1f1f1;
+    }
 </style>
 
 <div>
@@ -69,6 +89,9 @@
                 <tr data-id="{{ $p->id }}">
                     <td>{{ $p->sequnce }}</td>
                     <td>{{ $p->name }}</td>
+                    
+                   
+                    
                     <td>{{ $p->ingrediant }}</td>
                     <td>{{ $p->company }}</td>
                     <td>{{ $p->qty }}</td>
@@ -95,7 +118,11 @@
                 {{-- 2. The SINGLE Input Row (Submits to Controller) --}}
                 <tr id="inputRow" class="table-info">
                     <td><input type="text" name="sequnce" class="form-control sequnce" value="{{ count($products) + 1 }}"></td>
-                    <td><input type="text" name="product_name" class="form-control nameField" required ></td>
+                    
+                     <td style="position:relative;">
+    <input type="text" name="product_name" class="form-control nameField" required autocomplete="off">
+    <div id="searchResults"></div>
+</td>
                     <td><input type="text" name="ingrediant" class="form-control ingredientField"></td>
                     <td><input type="text" name="company" class="form-control companyField"></td>
                     <td><input type="text" name="qty" class="form-control calc qtyField"></td>
@@ -141,6 +168,145 @@
 </div>
 
 <script>
+
+const nameInput = document.querySelector(".nameField");
+const resultBox = document.getElementById("searchResults");
+
+let searchTimeout = null;
+let activeIndex = -1;
+let results = [];
+
+function updateActive(items) {
+
+    items.forEach((el, i) => {
+        if (i === activeIndex) {
+            el.style.background = "#f1f1f1";
+            el.style.color = "#000";
+            el.scrollIntoView({ block: "nearest" });
+        } else {
+            el.style.background = "#fff";
+            el.style.color = "#000";
+        }
+    });
+}
+
+nameInput.addEventListener("input", function () {
+    const q = this.value.trim();
+
+    if (q.length < 3) {
+        resultBox.style.display = "none";
+        return;
+    }
+
+    clearTimeout(searchTimeout);
+
+    searchTimeout = setTimeout(() => {
+        fetch(`{{ route('invoice.search.product') }}?q=${encodeURIComponent(q)}`)
+            .then(res => res.json())
+            .then(data => showSearchResults(data));
+    }, 300);
+});
+
+function showSearchResults(data) {
+
+    results = data;
+    activeIndex = -1;
+
+    if (!data.length) {
+        resultBox.style.display = "none";
+        return;
+    }
+
+    let html = "";
+
+    data.forEach((item, index) => {
+        html += `
+            <div class="result-item"
+                data-index="${index}"
+                data-name="${item.name}"
+                data-company="${item.company}"
+                data-ingredient="${item.ingredient}"
+				data-expiry_alert="${item.expiry_alert_months}"
+                data-perpack="${item.items_per_box}">
+                ${item.name} — ${item.company}
+            </div>
+        `;
+    });
+
+    resultBox.innerHTML = html;
+    resultBox.style.display = "block";
+	
+	resultBox.querySelectorAll(".result-item").forEach(div => {
+		div.addEventListener("click", function () {
+			applyProductSelection(this);
+		});
+	});
+}
+
+nameInput.addEventListener("keydown", function (e) {
+
+    const items = resultBox.querySelectorAll(".result-item");
+
+    if (!items.length) return;
+
+    // DOWN ARROW
+    if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % items.length;
+        updateActive(items);
+    }
+
+    // UP ARROW
+    if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + items.length) % items.length;
+        updateActive(items);
+    }
+
+    // ENTER or TAB → SELECT
+    if (e.key === "Enter") {
+        if (activeIndex >= 0) {
+            e.preventDefault();
+            items[activeIndex].click();
+        }
+    }
+	
+	if (e.key === "Tab") {
+
+        if (activeIndex >= 0) {
+          //  e.preventDefault();
+          //  items[activeIndex].click();
+        } else {
+            // allow natural tab flow
+            //resultBox.style.display = "none";
+           // activeIndex = -1;
+        }
+    }
+	
+	
+});
+
+
+
+function applyProductSelection(itemDiv) {
+    const name = itemDiv.getAttribute("data-name");
+    const company = itemDiv.getAttribute("data-company");
+    const ingredient = itemDiv.getAttribute("data-ingredient");
+    const perpack = itemDiv.getAttribute("data-perpack");
+	const expiry_alert = itemDiv.getAttribute("data-expiry_alert") || "";
+
+    // Fill fields
+    inputRow.querySelector(".nameField").value = name;
+    inputRow.querySelector(".ingredientField").value = ingredient;
+    inputRow.querySelector(".companyField").value = company;
+    inputRow.querySelector(".perPackField").value = perpack;
+	//inputRow.querySelector(".expiry_alert").value = expiry_alert;
+	inputRow.querySelector('select[name="expiry_alert"]').value = expiry_alert || "";
+
+    resultBox.style.display = "none";
+
+    calculateRow();
+}
 
 document.addEventListener("DOMContentLoaded", function() {
         // Focus on the nameField input row

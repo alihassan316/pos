@@ -660,7 +660,7 @@ ts.control_input.focus();
 })();
 
 (function() {
-    const REQUIRED_PASSWORD = "789"; // Set your password here
+    const REQUIRED_PASSWORD = "321"; 
     let currentPrintMode = 0;
     const passModal = new bootstrap.Modal(document.getElementById('passwordModal'));
     const passInput = document.getElementById('auth_password_input');
