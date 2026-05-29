@@ -45,6 +45,30 @@
     #searchResults div:hover {
         background:#f1f1f1;
     }
+	
+	#searchResults .result-item {
+        padding: 6px 10px;
+        cursor: pointer;
+    }
+
+    #searchResults .result-item {
+        padding: 6px 10px;
+        cursor: pointer;
+    }
+
+    /* Keyboard or mouse active state */
+    #searchResults .result-item.active {
+        background: #007bff !important;
+        color: #fff !important;
+    }
+
+    /* Hover should temporarily activate the same style */
+    #searchResults .result-item:hover {
+        background: #007bff !important;
+        color: #fff !important;
+    }
+	
+	
 </style>
 
 <div>
@@ -180,7 +204,7 @@ function updateActive(items) {
 
     items.forEach((el, i) => {
         if (i === activeIndex) {
-            el.style.background = "#f1f1f1";
+            el.style.background = "#007bff";
             el.style.color = "#000";
             el.scrollIntoView({ block: "nearest" });
         } else {
