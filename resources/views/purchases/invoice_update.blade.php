@@ -128,7 +128,7 @@
                     <td><input type="text" name="qty" class="form-control calc qtyField"></td>
                     <td><input type="text" name="bonus" class="form-control calc bonusField"></td>
                     <td><input type="text" name="perpack" class="form-control calc perPackField"></td>
-                    <td><input type="text" name="batch" class="form-control"></td>
+                    <td><input type="text" name="batch" class="form-control batchField"></td>
                     <td><input type="text" name="expiry" class="form-control expiryField" placeholder="DDMMYYYY"></td>
                     <td>
                         <select name="expiry_alert" class="form-select">
@@ -226,6 +226,16 @@ function showSearchResults(data) {
                 data-name="${item.name}"
                 data-company="${item.company}"
                 data-ingredient="${item.ingredient}"
+				data-expiryField="${item.expiry}"
+				data-qtyField="${item.qty}"
+				data-bonus="${item.bonus}"
+				data-batch="${item.batch_no}"
+				data-buyprice="${item.buyprice}"
+				data-boxprice="${item.box_price}"
+				data-discount_percent="${item.discount_percent}"
+				data-discount_flat="${item.discount_flat}"
+				data-gst_percent="${item.gst_percent}"
+				data-gst_flat="${item.gst_flat}"
 				data-expiry_alert="${item.expiry_alert_months}"
                 data-perpack="${item.items_per_box}">
                 ${item.name} — ${item.company}
@@ -294,12 +304,33 @@ function applyProductSelection(itemDiv) {
     const ingredient = itemDiv.getAttribute("data-ingredient");
     const perpack = itemDiv.getAttribute("data-perpack");
 	const expiry_alert = itemDiv.getAttribute("data-expiry_alert") || "";
+	const expiry = itemDiv.getAttribute("data-expiryField") || "";
+	const qtyField = itemDiv.getAttribute("data-qtyField") || ""; 
+	const bonus = itemDiv.getAttribute("data-bonus") || ""; 
+	const batch = itemDiv.getAttribute("data-batch") || ""; 
+	const boxprice = itemDiv.getAttribute("data-boxprice") || ""; 
+	const discount_percent = itemDiv.getAttribute("data-discount_percent") || ""; 
+	const discount_flat = itemDiv.getAttribute("data-discount_flat") || ""; 
+	const gst_percent = itemDiv.getAttribute("data-gst_percent") || ""; 
+	const gst_flat = itemDiv.getAttribute("data-gst_flat") || ""; 
+	const buyprice = itemDiv.getAttribute("data-buyprice") || ""; 
 
     // Fill fields
     inputRow.querySelector(".nameField").value = name;
     inputRow.querySelector(".ingredientField").value = ingredient;
     inputRow.querySelector(".companyField").value = company;
     inputRow.querySelector(".perPackField").value = perpack;
+	inputRow.querySelector(".expiryField").value = expiry;
+	inputRow.querySelector(".qtyField").value = qtyField;
+	inputRow.querySelector(".bonusField").value = bonus;
+	inputRow.querySelector(".batchField").value = batch;
+	inputRow.querySelector(".packPriceField").value = buyprice;
+	inputRow.querySelector(".boxPriceField").value = boxprice;
+	inputRow.querySelector(".discountPerField").value = discount_percent;
+	inputRow.querySelector(".discountFlatField").value = discount_flat;
+	inputRow.querySelector(".gstPerField").value = gst_percent;
+	inputRow.querySelector(".gstFlatField").value = gst_flat;
+	
 	//inputRow.querySelector(".expiry_alert").value = expiry_alert;
 	inputRow.querySelector('select[name="expiry_alert"]').value = expiry_alert || "";
 

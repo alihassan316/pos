@@ -134,6 +134,17 @@ $result = DB::table('products_invoice as p')
             'ingredient' => $item->ingredient ?? '',
             'items_per_box' => $item->items_per_box ?? '',
 			'expiry_alert_months' => $item->expiry_alert_months ?? '',
+			'qty' 		=> $item->qty ?? '',
+			'bonus' 		=> $item->bonus ?? '',
+			'batch_no' 		=> $item->batch_no ?? '',
+			'buyprice' => $item->gross_buyprice ?? $item->buy_price,
+			'box_price' 		=> $item->sell_price ?? '',
+			'discount_percent' 		=> $item->discount_percent ?? '',
+			'discount_flat' 		=> $item->discount_flat ?? '',
+			'gst_percent' 		=> $item->gst ?? '',
+			'gst_flat' 		=> $item->gst_flat ?? '',
+			'expiry' 		=> date("d/m/Y", strtotime($item->expiry)) ?? '',
+			//'qty' 		=> $item->qty ?? '',
         ];
     });
 	

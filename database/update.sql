@@ -1,0 +1,1 @@
+ALTER TABLE `products_invoice` ADD `gross_buyprice` DECIMAL(11,2) NULL DEFAULT NULL AFTER `barcode`;

@@ -159,6 +159,7 @@ class PurchaseEntryController extends Controller
                 'batch_no' => $p->batch,
                 'qty' => $qty,
                 'bonus' => $bonus,
+				'grossbuyprice' => floatval($p->packprice),
                 'per_pack' => $perPack,
                 'pack_price' => $packPrice,
                 'discount_percent' => $discountPercent,
@@ -652,6 +653,7 @@ public function saveProductsInvoice($productsData, $invoiceId)
         $pinv->ingredient = $p['ingredient'] ?? null;
         $pinv->company = $p['company'] ?? null;
         $pinv->batch_no = $p['batch_no'] ?? null;
+		$pinv->gross_buyprice  = $p['grossbuyprice'] ?? null;
         $pinv->buy_price = $packPrice;
         $pinv->discount_percent = $discountPercent;
         $pinv->discount_flat = $discountFlat;

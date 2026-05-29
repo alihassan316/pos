@@ -24,6 +24,7 @@ class ProductsInvoice extends Model
         'barcode',
 		'qty',
 		'bonus',
+		'gross_buyprice',
         'buy_price',
         'discount_percent',
         'discount_flat',
