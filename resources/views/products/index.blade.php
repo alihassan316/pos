@@ -69,12 +69,17 @@
                 <tr>
                     <th>#</th>
                     <th>Product</th>
-                    
+                    @if(request()->filled('search'))
+                    <th>Ingrediants</th>
+                    @endif
                     <th>Buy Price</th>
                     <th>Sell Price</th>
                     <th>Unit Price</th>
                     <th>Discount</th>
                     <th>Stock</th>
+                    @if(request()->filled('search'))
+                    <th>Batch</th>
+                    @endif
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -86,6 +91,11 @@
                     <td>
                         <div class="fw-semibold">{{ $product->name }}</div>
                     </td>
+                    @if(request()->filled('search'))
+                    <td>
+                        <div class="fw-semibold">{{ $product->ingredient }}</div>
+                    </td>
+                    @endif
                     <!--<td>
                         <div style="font-size:13px;">{{ $product->sku ?: '—' }}</div>
                         <div class="text-muted" style="font-size:11px;">{{ $product->barcode ?: '' }}</div>
@@ -111,6 +121,11 @@
                             <span class="badge bg-success">{{ $product->current_stock }}</span>
                         @endif
                     </td>
+                    @if(request()->filled('search'))
+                    <td>
+                        <div class="fw-semibold">{{ $product->batch_no }}</div>
+                    </td>
+                    @endif
                     <td>
                         @if($product->status)
                             <span class="badge bg-success">Active</span>

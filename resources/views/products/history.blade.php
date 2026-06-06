@@ -12,6 +12,7 @@
 <div class="card mb-4">
     <div class="card-header">
         <h5 class="mb-0">{{ $product->name }}</h5>
+        <div>{{ $product->ingredient }}</div>
     </div>
     <div class="card-body">
         <p><strong>Buy Price:</strong> {{ number_format($product->buy_price, 2) }} Rs</p>
@@ -36,6 +37,7 @@
                         <th>Invoice</th>
                         <th>Brooker</th>
                         <th>Date</th>
+                        <th>Batch</th>
                         <th>Qty</th>
                         <th>Bonus</th>
                         <th>Buy Price</th>
@@ -57,6 +59,7 @@
                         <td>{{ $p->purchaseInvoice->invoice_number ?? '-' }}</td>
                         <td>{{$p->purchaseInvoice->company_name}}</td>
                         <td>{{ $p->created_at ? $p->created_at->format('d-M-Y') : '-' }}</td>
+                        <td>{{ $p->batch_no }} </td>
                         <td>{{ $p->qty }}</td>
                         <td>{{ $p->bonus }}</td>
                         <td>{{ number_format($p->buy_price, 2) }}</td>

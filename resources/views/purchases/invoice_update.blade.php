@@ -204,7 +204,7 @@ function updateActive(items) {
 
     items.forEach((el, i) => {
         if (i === activeIndex) {
-            el.style.background = "#007bff";
+            el.style.background = "#0078d7";
             el.style.color = "#000";
             el.scrollIntoView({ block: "nearest" });
         } else {
