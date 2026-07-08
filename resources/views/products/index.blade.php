@@ -69,7 +69,7 @@
                 <tr>
                     <th>#</th>
                     <th>Product</th>
-                    
+                    <th>Company</th>
                     <th>Ingrediants</th>
                     
                     <th>Buy Price</th>
@@ -90,6 +90,9 @@
                     <td class="text-muted">{{ $products->firstItem() + $i }}</td>
                     <td>
                         <div class="fw-semibold">{{ $product->name }}</div>
+                    </td>
+                     <td>
+                        <div class="fw-semibold">{{ $product->company }}</div>
                     </td>
                     
                     <td>

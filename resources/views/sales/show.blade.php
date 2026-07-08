@@ -218,14 +218,10 @@
     </div>
 </div>
 @endif
-        
-        
+       
     </div>
 
     {{-- Right: Screen-only invoice details --}}
-    
-    
-    
     
     <div class="col-lg-7 no-print">
         <div class="card mb-4">
