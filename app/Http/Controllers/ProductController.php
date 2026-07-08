@@ -17,6 +17,7 @@ class ProductController extends Controller
 		$query = Product::with('productInvoice.purchaseInvoice');
 	
 		// Search filter
+		/*
 		if ($request->search) {
 			$search = $request->search;
 	
@@ -24,6 +25,20 @@ class ProductController extends Controller
 				$q->where('name', 'LIKE', "%{$search}%")
 				  ->orWhere('company', 'LIKE', "%{$search}%")
 				  ->orWhere('ingredient', 'LIKE', "%{$search}%");
+			});
+		}
+		*/
+		
+		if ($request->search) {
+			$search = $request->search;
+		
+			$query->where(function ($q) use ($search) {
+				$q->where('name', 'LIKE', "%{$search}%")
+				  ->orWhere('company', 'LIKE', "%{$search}%")
+				  ->orWhere('ingredient', 'LIKE', "%{$search}%")
+				  ->orWhereHas('productInvoice.purchaseInvoice', function ($q) use ($search) {
+					  $q->where('company_name', 'LIKE', "%{$search}%");
+				  });
 			});
 		}
 	
