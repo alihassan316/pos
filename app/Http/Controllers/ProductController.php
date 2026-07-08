@@ -13,7 +13,8 @@ class ProductController extends Controller
     // List products
 	public function index(Request $request)
 	{
-		$query = Product::query();
+		//$query = Product::query();
+		$query = Product::with('productInvoice.purchaseInvoice');
 	
 		// Search filter
 		if ($request->search) {

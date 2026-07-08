@@ -70,6 +70,7 @@
                     <th>#</th>
                     <th>Product</th>
                     <th>Company</th>
+                    <th>Brooker</th>
                     <th>Ingrediants</th>
                     
                     <th>Buy Price</th>
@@ -91,8 +92,13 @@
                     <td>
                         <div class="fw-semibold">{{ $product->name }}</div>
                     </td>
+                    <td>
+                    	{{ $product->company }}
+                    </td>
                      <td>
-                        <div class="fw-semibold">{{ $product->company }}</div>
+                        
+                        {{ $product->productInvoice?->purchaseInvoice?->company_name ?? '' }}
+                       
                     </td>
                     
                     <td>

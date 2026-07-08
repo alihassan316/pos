@@ -52,4 +52,8 @@ class Product extends Model
 	{
 		return $this->belongsTo(PurchaseInvoice::class);
 	}
+	public function productInvoice()
+	{
+		return $this->hasOne(ProductsInvoice::class, 'name', 'name');
+	}
 }
