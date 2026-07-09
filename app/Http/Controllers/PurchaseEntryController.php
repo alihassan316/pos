@@ -12,9 +12,25 @@ use Illuminate\Support\Facades\DB;
 class PurchaseEntryController extends Controller
 {
 	
-	public function index()
+	public function index(Request $request)
 	{
-		$invoices = PurchaseInvoice::orderBy('id', 'desc')->paginate(10);
+		$query = PurchaseInvoice::query();
+	
+		// Search
+		if ($request->filled('search')) {
+			$search = $request->search;
+	
+			$query->where(function ($q) use ($search) {
+				$q->where('company_name', 'LIKE', "%{$search}%")
+				  ->orWhere('contact', 'LIKE', "%{$search}%")
+				  ->orWhere('invoice_number', 'LIKE', "%{$search}%");
+			});
+		}
+	
+		$invoices = $query->orderBy('id', 'desc')
+						  ->paginate(10)
+						  ->appends($request->only('search'));
+	
 		return view('purchases.index', compact('invoices'));
 	}
 	
